@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fed Again</title>
+
+  <!-- Tailwind for clean styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase client -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-white text-neutral-900">
+  <main class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+
+      <!-- Question -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight leading-tight">
+          Has 🐶 been Fed? Walked?
+        </h1>
+        <p class="mt-2 text-sm text-neutral-500">
+          Household status — tap to update.
+        </p>
+      </div>
+
+      <!-- Status cards -->
+      <div class="space-y-3 mb-8">
+        <div class="rounded-2xl border border-neutral-200 p-4">
+          <div class="text-sm text-neutral-500">Last Fed</div>
+          <div id="lastFed" class="mt-1 text-lg font-medium">—</div>
+        </div>
+
+        <div class="rounded-2xl border border-neutral-200 p-4">
+          <div class="text-sm text-neutral-500">Last Walked</div>
+          <div id="lastWalked" class="mt-1 text-lg font-medium">—</div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <button id="btnFed"
+          class="rounded-2xl border border-neutral-900 px-4 py-4 text-base font-semibold active:scale-[0.98]">
+          Fed
+        </button>
+
+        <button id="btnWalked"
+          class="rounded-2xl border border-neutral-900 px-4 py-4 text-base font-semibold active:scale-[0.98]">
+          Walked
+        </button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="toast"
+        class="text-sm text-neutral-600 opacity-0 transition-opacity">
+        Updated.
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-10 flex justify-center">
+        <div class="text-xs tracking-wide text-neutral-400">
+          FED AGAIN
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    // STEP 1 (we will do this next):
+    // Paste your Supabase details here
+    const SUPABASE_URL = "PASTE_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY";
+
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    // Get household ID from URL
+    function getHouseholdId() {
+      const url = new URL(window.location.href);
+      const param = url.searchParams.get("h");
+      if (param) return param;
+
+      const parts = url.pathname.split("/").filter(Boolean);
+      const index = parts.indexOf("h");
+      if (index !== -1 && parts[index + 1]) return parts[index + 1];
+
+      return null;
+    }
+
+    const householdId = getHouseholdId();
+
+    const elLastFed = document.getElementById("lastFed");
+    const elLastWalked = document.getElementById("lastWalked");
+    const btnFed = document.getElementById("btnFed");
+    const btnWalked = document.getElementById("btnWalked");
+    const toast = document.getElementById("toast");
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.remove("opacity-0");
+      toast.classList.add("opacity-100");
+      setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0");
+      }, 1200);
+    }
+
+    function formatTime(ts) {
+      if (!ts) return "—";
+      const d = new Date(ts);
+      return d.toLocaleString(undefined, {
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    async function loadHousehold() {
+      if (!householdId) {
+        elLastFed.textContent = "Missing household link.";
+        elLastWalked.textContent = "Scan the QR code.";
+        btnFed.disabled = true;
+        btnWalked.disabled = true;
+        btnFed.classList.add("opacity-40");
+        btnWalked.classList.add("opacity-40");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("households")
+        .select("last_fed_at,last_walked_at")
+        .eq("id", householdId)
+        .single();
+
+      if (error) {
+        elLastFed.textContent = "Not found.";
+        elLastWalked.textContent = "Check the link.";
+        return;
+      }
+
+      elLastFed.textContent = formatTime(data.last_fed_at);
+      elLastWalked.textContent = formatTime(data.last_walked_at);
+    }
+
+    async function setFed() {
+      if (!householdId) return;
+      btnFed.disabled = true;
+
+      const { error } = await supabase
+        .from("households")
+        .update({ last_fed_at: new Date().toISOString() })
+        .eq("id", householdId);
+
+      btnFed.disabled = false;
+
+      if (error) return showToast("Couldn’t update.");
+      await loadHousehold();
+      showToast("Fed updated.");
+    }
+
+    async function setWalked() {
+      if (!householdId) return;
+      btnWalked.disabled = true;
+
+      const { error } = await supabase
+        .from("households")
+        .update({ last_walked_at: new Date().toISOString() })
+        .eq("id", householdId);
+
+      btnWalked.disabled = false;
+
+      if (error) return showToast("Couldn’t update.");
+      await loadHousehold();
+      showToast("Walk updated.");
+    }
+
+    btnFed.addEventListener("click", setFed);
+    btnWalked.addEventListener("click", setWalked);
+
+    loadHousehold();
+  </script>
+</body>
+</html>
