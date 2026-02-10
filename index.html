@@ -1,190 +1,205 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fed Again</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fed Again</title>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #ffffff;
+        color: #111;
+      }
+      .wrap {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 28px 18px 40px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        text-align: center;
+        margin: 6px 0 6px;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        margin: 0 0 18px;
+      }
+      .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px;
+        background: #fff;
+        margin: 12px 0;
+      }
+      .label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+      .value {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      button {
+        appearance: none;
+        border: 1px solid #111;
+        background: #fff;
+        color: #111;
+        border-radius: 12px;
+        padding: 14px 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:active { transform: translateY(1px); }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .brand {
+        margin-top: 26px;
+        text-align: center;
+        letter-spacing: 0.22em;
+        font-size: 11px;
+        color: #9ca3af;
+        font-weight: 700;
+      }
+      .error {
+        margin-top: 10px;
+        color: #b91c1c;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+      }
+    </style>
+  </head>
 
-  <!-- Tailwind for clean styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <body>
+    <div class="wrap">
+      <h1>Has 🐶 been Fed? Walked?</h1>
+      <p class="sub">Household status — tap to update.</p>
 
-  <!-- Supabase client -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
-
-<body class="bg-white text-neutral-900">
-  <main class="min-h-screen flex items-center justify-center p-6">
-    <div class="w-full max-w-md">
-
-      <!-- Question -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-semibold tracking-tight leading-tight">
-          Has 🐶 been Fed? Walked?
-        </h1>
-        <p class="mt-2 text-sm text-neutral-500">
-          Household status — tap to update.
-        </p>
+      <div class="card">
+        <div class="label">Last Fed</div>
+        <div class="value" id="lastFed">—</div>
       </div>
 
-      <!-- Status cards -->
-      <div class="space-y-3 mb-8">
-        <div class="rounded-2xl border border-neutral-200 p-4">
-          <div class="text-sm text-neutral-500">Last Fed</div>
-          <div id="lastFed" class="mt-1 text-lg font-medium">—</div>
-        </div>
-
-        <div class="rounded-2xl border border-neutral-200 p-4">
-          <div class="text-sm text-neutral-500">Last Walked</div>
-          <div id="lastWalked" class="mt-1 text-lg font-medium">—</div>
-        </div>
+      <div class="card">
+        <div class="label">Last Walked</div>
+        <div class="value" id="lastWalked">—</div>
       </div>
 
-      <!-- Action buttons -->
-      <div class="grid grid-cols-2 gap-3 mb-6">
-        <button id="btnFed"
-          class="rounded-2xl border border-neutral-900 px-4 py-4 text-base font-semibold active:scale-[0.98]">
-          Fed
-        </button>
-
-        <button id="btnWalked"
-          class="rounded-2xl border border-neutral-900 px-4 py-4 text-base font-semibold active:scale-[0.98]">
-          Walked
-        </button>
+      <div class="row">
+        <button id="fedBtn">Fed</button>
+        <button id="walkBtn">Walked</button>
       </div>
 
-      <!-- Feedback -->
-      <div id="toast"
-        class="text-sm text-neutral-600 opacity-0 transition-opacity">
-        Updated.
-      </div>
+      <div class="error" id="err"></div>
 
-      <!-- Footer -->
-      <footer class="mt-10 flex justify-center">
-        <div class="text-xs tracking-wide text-neutral-400">
-          FED AGAIN
-        </div>
-      </footer>
-
+      <div class="brand">FED AGAIN</div>
     </div>
-  </main>
 
-  <script>
-    // STEP 1 (we will do this next):
-    // Paste your Supabase details here
-    const SUPABASE_URL = "PASTE_SUPABASE_PROJECT_URL";
-    const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY";
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    const supabase = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+      // These env vars are NOT automatically available in a plain static HTML page on Vercel.
+      // For now, paste your values directly here (they're meant to be public for anon access).
+      const SUPABASE_URL = "https://ojdwizgygxcniegoqelh.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qZHdpemd5Z3hjbmllZ29xZWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjUwMzEsImV4cCI6MjA4NjI0MTAzMX0.SLk-MLG084LTAYy5qrEmyRd99vGoTZDxZahQ_pROjq4";
 
-    // Get household ID from URL
-    function getHouseholdId() {
-      const url = new URL(window.location.href);
-      const param = url.searchParams.get("h");
-      if (param) return param;
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const parts = url.pathname.split("/").filter(Boolean);
-      const index = parts.indexOf("h");
-      if (index !== -1 && parts[index + 1]) return parts[index + 1];
+      const $lastFed = document.getElementById("lastFed");
+      const $lastWalked = document.getElementById("lastWalked");
+      const $fedBtn = document.getElementById("fedBtn");
+      const $walkBtn = document.getElementById("walkBtn");
+      const $err = document.getElementById("err");
 
-      return null;
-    }
-
-    const householdId = getHouseholdId();
-
-    const elLastFed = document.getElementById("lastFed");
-    const elLastWalked = document.getElementById("lastWalked");
-    const btnFed = document.getElementById("btnFed");
-    const btnWalked = document.getElementById("btnWalked");
-    const toast = document.getElementById("toast");
-
-    function showToast(text) {
-      toast.textContent = text;
-      toast.classList.remove("opacity-0");
-      toast.classList.add("opacity-100");
-      setTimeout(() => {
-        toast.classList.remove("opacity-100");
-        toast.classList.add("opacity-0");
-      }, 1200);
-    }
-
-    function formatTime(ts) {
-      if (!ts) return "—";
-      const d = new Date(ts);
-      return d.toLocaleString(undefined, {
-        weekday: "short",
-        hour: "numeric",
-        minute: "2-digit",
-        month: "short",
-        day: "numeric"
-      });
-    }
-
-    async function loadHousehold() {
-      if (!householdId) {
-        elLastFed.textContent = "Missing household link.";
-        elLastWalked.textContent = "Scan the QR code.";
-        btnFed.disabled = true;
-        btnWalked.disabled = true;
-        btnFed.classList.add("opacity-40");
-        btnWalked.classList.add("opacity-40");
-        return;
+      function showErr(msg) {
+        $err.textContent = msg;
+        $err.style.display = "block";
+      }
+      function clearErr() {
+        $err.textContent = "";
+        $err.style.display = "none";
       }
 
-      const { data, error } = await supabase
-        .from("households")
-        .select("last_fed_at,last_walked_at")
-        .eq("id", householdId)
-        .single();
-
-      if (error) {
-        elLastFed.textContent = "Not found.";
-        elLastWalked.textContent = "Check the link.";
-        return;
+      function formatTime(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return "—";
+        return d.toLocaleString();
       }
 
-      elLastFed.textContent = formatTime(data.last_fed_at);
-      elLastWalked.textContent = formatTime(data.last_walked_at);
-    }
+      let householdId = null;
 
-    async function setFed() {
-      if (!householdId) return;
-      btnFed.disabled = true;
+      async function loadHousehold() {
+        clearErr();
+        const { data, error } = await supabase
+          .from("households")
+          .select("id,last_fed_at,last_walked_at,created_at")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
 
-      const { error } = await supabase
-        .from("households")
-        .update({ last_fed_at: new Date().toISOString() })
-        .eq("id", householdId);
+        if (error) throw error;
+        if (!data) throw new Error("No household row found. Insert one row in Supabase.");
 
-      btnFed.disabled = false;
+        householdId = data.id;
+        $lastFed.textContent = formatTime(data.last_fed_at);
+        $lastWalked.textContent = formatTime(data.last_walked_at);
+      }
 
-      if (error) return showToast("Couldn’t update.");
-      await loadHousehold();
-      showToast("Fed updated.");
-    }
+      async function setFed() {
+        clearErr();
+        $fedBtn.disabled = true;
+        try {
+          const now = new Date().toISOString();
+          const { error } = await supabase
+            .from("households")
+            .update({ last_fed_at: now })
+            .eq("id", householdId);
 
-    async function setWalked() {
-      if (!householdId) return;
-      btnWalked.disabled = true;
+          if (error) throw error;
+          $lastFed.textContent = formatTime(now);
+        } finally {
+          $fedBtn.disabled = false;
+        }
+      }
 
-      const { error } = await supabase
-        .from("households")
-        .update({ last_walked_at: new Date().toISOString() })
-        .eq("id", householdId);
+      async function setWalked() {
+        clearErr();
+        $walkBtn.disabled = true;
+        try {
+          const now = new Date().toISOString();
+          const { error } = await supabase
+            .from("households")
+            .update({ last_walked_at: now })
+            .eq("id", householdId);
 
-      btnWalked.disabled = false;
+          if (error) throw error;
+          $lastWalked.textContent = formatTime(now);
+        } finally {
+          $walkBtn.disabled = false;
+        }
+      }
 
-      if (error) return showToast("Couldn’t update.");
-      await loadHousehold();
-      showToast("Walk updated.");
-    }
+      $fedBtn.addEventListener("click", () => setFed().catch(e => showErr(e.message || String(e))));
+      $walkBtn.addEventListener("click", () => setWalked().catch(e => showErr(e.message || String(e))));
 
-    btnFed.addEventListener("click", setFed);
-    btnWalked.addEventListener("click", setWalked);
-
-    loadHousehold();
-  </script>
-</body>
+      loadHousehold().catch(e => showErr(e.message || String(e)));
+    </script>
+  </body>
 </html>
