@@ -142,24 +142,34 @@
         if (Number.isNaN(d.getTime())) return "—";
         return d.toLocaleString();
       }
+function getHouseholdIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("h");
+}
 
-      let householdId = null;
+let householdId = null;
 
-      async function loadHousehold() {
-        clearErr();
-        const { data, error } = await supabase
-          .from("households")
-          .select("id,last_fed_at,last_walked_at,created_at")
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .maybeSingle();
+async function loadHousehold() {
+  clearErr();
 
-        if (error) throw error;
-        if (!data) throw new Error("No household row found. Insert one row in Supabase.");
+  householdId = getHouseholdIdFromUrl();
+  if (!householdId) {
+    throw new Error("Missing household id in URL. Add ?h=HOUSEHOLD_UUID");
+  }
 
-        householdId = data.id;
-        $lastFed.textContent = formatTime(data.last_fed_at);
-        $lastWalked.textContent = formatTime(data.last_walked_at);
+  const { data, error } = await supabase
+    .from("households")
+    .select("id,last_fed_at,last_walked_at")
+    .eq("id", householdId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("Household not found. Check QR code URL.");
+
+  $lastFed.textContent = formatTime(data.last_fed_at);
+  $lastWalked.textContent = formatTime(data.last_walked_at);
+}
+
       }
 
       async function setFed() {
