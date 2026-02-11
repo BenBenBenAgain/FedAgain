@@ -1,514 +1,179 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fed Again — Admin QR Generator</title>
-    <style>
-      :root { color-scheme: light; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #ffffff;
-        color: #111;
-      }
-      .wrap {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 28px 18px 60px;
-      }
-      h1 {
-        font-size: 28px;
-        font-weight: 800;
-        margin: 0 0 8px;
-        letter-spacing: -0.02em;
-      }
-      .sub { margin: 0 0 22px; color: #6b7280; }
-
-      .card {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 16px;
-        background: #fff;
-        margin: 12px 0;
-      }
-
-      label {
-        display: block;
-        font-size: 13px;
-        color: #374151;
-        margin: 10px 0 6px;
-        font-weight: 600;
-      }
-      input {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid #d1d5db;
-        border-radius: 12px;
-        padding: 12px 12px;
-        font-size: 16px;
-        outline: none;
-      }
-      input:focus { border-color: #111; }
-
-      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-      .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
-
-      button {
-        appearance: none;
-        border: 1px solid #111;
-        background: #fff;
-        color: #111;
-        border-radius: 12px;
-        padding: 14px 12px;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-      button:active { transform: translateY(1px); }
-      button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-      .ok { margin-top: 10px; color: #065f46; font-size: 14px; display: none; font-weight: 700; }
-      .err { margin-top: 10px; color: #b91c1c; font-size: 14px; display: none; font-weight: 700; white-space: pre-wrap; }
-
-      .result { display: none; margin-top: 14px; }
-      .result a { word-break: break-all; }
-
-      .qrBox {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 14px;
-      }
-      .qrBox img {
-        display: block;
-        width: 280px;
-        height: 280px;
-        max-width: 100%;
-        margin: 0 auto;
-      }
-      .tiny { font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center; }
-
-      .mutedNote { font-size: 12px; color: #6b7280; margin-top: 6px; }
-
-      /* List */
-      .listHead {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .listWrap { display: none; margin-top: 12px; }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-      }
-      th, td {
-        text-align: left;
-        padding: 10px 8px;
-        border-bottom: 1px solid #e5e7eb;
-        vertical-align: top;
-      }
-      th { color: #6b7280; font-weight: 700; font-size: 12px; }
-      .pill {
-        display: inline-block;
-        padding: 4px 8px;
-        border: 1px solid #e5e7eb;
-        border-radius: 999px;
-        font-size: 12px;
-        color: #374151;
-        background: #fff;
-      }
-      .smallBtn {
-        padding: 10px 10px;
-        font-size: 13px;
-        font-weight: 800;
-        border-radius: 10px;
-      }
-      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-      /* ---------------- PRINT (FRIDGE MAGNET) ---------------- */
-      @media print {
-        body { background: #fff; }
-        .wrap { padding: 0; max-width: none; }
-        .noPrint { display: none !important; }
-        .printOnly { display: block !important; }
-      }
-      .printOnly { display: none; }
-
-      .magnetPage {
-        width: 90mm;
-        height: 120mm;
-        margin: 0 auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 10mm 8mm;
-        box-sizing: border-box;
-        display: grid;
-        grid-template-rows: auto 1fr auto auto;
-        gap: 6mm;
-      }
-      .magTitle { text-align: center; font-weight: 900; font-size: 18pt; letter-spacing: -0.02em; }
-      .magQR { display: grid; place-items: center; }
-      .magQR img { width: 70mm; height: 70mm; }
-      .magLabel { text-align: center; font-weight: 800; font-size: 12pt; color: #111; }
-      .magBrand { text-align: center; letter-spacing: 0.22em; font-size: 10pt; color: #6b7280; font-weight: 900; }
-    </style>
-  </head>
-
-  <body>
-    <div class="wrap">
-      <div class="noPrint">
-        <h1>Fed Again — Admin QR Generator</h1>
-        <p class="sub">Create a labelled household QR (includes both <b>h</b> and <b>k</b>) so updates are allowed.</p>
-
-        <!-- CREATE -->
-        <div class="card">
-          <label for="label">Household label (prints under QR)</label>
-          <input id="label" placeholder="e.g., Pawsha’s Fridge / Mum’s House / Unit 3" />
-
-          <label for="secret">Admin secret (not stored)</label>
-          <input id="secret" type="password" placeholder="ADMIN_SECRET" />
-
-          <div class="row">
-            <button id="createBtn">Create household + QR</button>
-            <button id="clearBtn" type="button">Clear</button>
-          </div>
-
-          <div class="ok" id="ok"></div>
-          <div class="err" id="err"></div>
-
-          <div class="result" id="result">
-            <div class="card">
-              <div style="font-weight:800; margin-bottom:8px;">Household URL</div>
-              <a id="urlLink" href="#" target="_blank" rel="noreferrer"></a>
-
-              <div class="row3">
-                <button id="copyBtn" type="button">Copy URL</button>
-                <button id="openBtn" type="button">Open</button>
-                <button id="printBtn" type="button">Print QR</button>
-              </div>
-
-              <div class="qrBox" style="margin-top:14px;">
-                <img id="qrImg" alt="QR code" />
-                <div class="tiny">Scan to link this device</div>
-              </div>
-
-              <div class="mutedNote" style="margin-top:10px;">
-                If you close this page, use the Household list below to find the same label and print again.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- LIST -->
-        <div class="card">
-          <div class="listHead">
-            <div>
-              <div style="font-weight:800;">Household list</div>
-              <div class="mutedNote">Recent households from Supabase (label + created time). Use this to re-print.</div>
-            </div>
-            <div class="actions">
-              <button id="refreshBtn" class="smallBtn" type="button">Refresh list</button>
-              <button id="toggleBtn" class="smallBtn" type="button">Show/Hide</button>
-            </div>
-          </div>
-
-          <div class="listWrap" id="listWrap">
-            <div class="mutedNote" id="listMeta" style="margin:10px 0;"></div>
-            <div style="overflow:auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Label</th>
-                    <th>Created</th>
-                    <th>Household</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="listBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PRINT LAYOUT -->
-      <div class="printOnly">
-        <div class="magnetPage">
-          <div class="magTitle">Has 🐶 been Fed? Walked?</div>
-          <div class="magQR">
-            <img id="printQrImg" alt="QR code" />
-          </div>
-          <div class="magLabel" id="printLabel"></div>
-          <div class="magBrand">FED AGAIN</div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      const $label = document.getElementById("label");
-      const $secret = document.getElementById("secret");
-
-      const $createBtn = document.getElementById("createBtn");
-      const $clearBtn = document.getElementById("clearBtn");
-
-      const $copyBtn = document.getElementById("copyBtn");
-      const $openBtn = document.getElementById("openBtn");
-      const $printBtn = document.getElementById("printBtn");
-
-      const $ok = document.getElementById("ok");
-      const $err = document.getElementById("err");
-      const $result = document.getElementById("result");
-
-      const $urlLink = document.getElementById("urlLink");
-      const $qrImg = document.getElementById("qrImg");
-
-      const $printQrImg = document.getElementById("printQrImg");
-      const $printLabel = document.getElementById("printLabel");
-
-      const $refreshBtn = document.getElementById("refreshBtn");
-      const $toggleBtn = document.getElementById("toggleBtn");
-      const $listWrap = document.getElementById("listWrap");
-      const $listBody = document.getElementById("listBody");
-      const $listMeta = document.getElementById("listMeta");
-
-      let last = null;
-
-      function showOk(msg) {
-        $ok.textContent = msg;
-        $ok.style.display = "block";
-      }
-      function clearOk() {
-        $ok.textContent = "";
-        $ok.style.display = "none";
-      }
-      function showErr(msg) {
-        $err.textContent = msg;
-        $err.style.display = "block";
-      }
-      function clearErr() {
-        $err.textContent = "";
-        $err.style.display = "none";
-      }
-
-      function resetUI() {
-        clearOk();
-        clearErr();
-        $result.style.display = "none";
-        last = null;
-        $urlLink.textContent = "";
-        $urlLink.href = "#";
-        $qrImg.src = "";
-        $printQrImg.src = "";
-        $printLabel.textContent = "";
-      }
-
-      async function createHousehold() {
-        clearOk();
-        clearErr();
-
-        const label = ($label.value || "").trim();
-        const secret = ($secret.value || "").trim();
-
-        if (!label) return showErr("Add a household label (so you don’t mix magnets up).");
-        if (!secret) return showErr("Enter admin secret.");
-
-        $createBtn.disabled = true;
-
-        try {
-          const resp = await fetch("/api/create-household", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-admin-secret": secret
-            },
-            body: JSON.stringify({ label })
-          });
-
-          const text = await resp.text();
-          let json = null;
-          try { json = JSON.parse(text); } catch (_) {}
-
-          if (!resp.ok) {
-            const msg = json?.error ? json.error : text;
-            throw new Error(msg || "Request failed");
-          }
-
-          last = json;
-
-          $urlLink.textContent = json.url;
-          $urlLink.href = json.url;
-
-          $qrImg.src = json.qrPngUrl;
-
-          $printQrImg.src = json.qrPngUrl;
-          $printLabel.textContent = label;
-
-          $result.style.display = "block";
-          showOk("Created. Print it, stick it on the fridge, scan it on two phones.");
-
-        } catch (e) {
-          showErr(e?.message || String(e));
-        } finally {
-          $createBtn.disabled = false;
-        }
-      }
-
-      async function copyUrl() {
-        clearErr();
-        if (!last?.url) return;
-        try {
-          await navigator.clipboard.writeText(last.url);
-          showOk("Copied URL.");
-        } catch (_) {
-          showErr("Could not copy (browser blocked clipboard).");
-        }
-      }
-
-      function openUrl(url = null) {
-        clearErr();
-        const u = url || last?.url;
-        if (!u) return;
-        window.open(u, "_blank", "noopener,noreferrer");
-      }
-
-      function printMagnet(qrPngUrl = null, label = null) {
-        clearErr();
-        const qr = qrPngUrl || last?.qrPngUrl;
-        const lab = label || ($label.value || "").trim() || " ";
-        if (!qr) return showErr("No QR to print.");
-
-        $printQrImg.src = qr;
-        $printLabel.textContent = lab;
-        window.print();
-      }
-
-      async function loadList() {
-        clearErr();
-        clearOk();
-
-        const secret = ($secret.value || "").trim();
-        if (!secret) return showErr("Enter admin secret (needed to load the list).");
-
-        $refreshBtn.disabled = true;
-        $listMeta.textContent = "Loading…";
-        $listBody.innerHTML = "";
-
-        try {
-          const resp = await fetch("/api/list-households", {
-            method: "GET",
-            headers: {
-              "x-admin-secret": secret
-            }
-          });
-
-          const text = await resp.text();
-          let json = null;
-          try { json = JSON.parse(text); } catch (_) {}
-
-          if (!resp.ok) {
-            const msg = json?.error ? json.error : text;
-            throw new Error(msg || "Request failed");
-          }
-
-          const rows = json.rows || [];
-          $listMeta.textContent = `Loaded ${rows.length} households.`;
-
-          for (const r of rows) {
-  const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
-  const label = r.label || "(no label)";
-  const id = r.id;
-  const k = r.edit_key;
-
-  const fullUrl = k
-    ? `${location.origin}/?h=${encodeURIComponent(id)}&k=${encodeURIComponent(k)}`
-    : `${location.origin}/?h=${encodeURIComponent(id)}`;
-
-  const qrPngUrl =
-    `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`;
-
-  const tr = document.createElement("tr");
-
-  const tdLabel = document.createElement("td");
-  tdLabel.textContent = label;
-
-  const tdCreated = document.createElement("td");
-  tdCreated.innerHTML = `<span class="pill">${created}</span>`;
-
-  const tdId = document.createElement("td");
-  tdId.textContent = id;
-
-  const tdActions = document.createElement("td");
-  const wrap = document.createElement("div");
-  wrap.className = "actions";
-
-  const btnOpen = document.createElement("button");
-  btnOpen.className = "smallBtn";
-  btnOpen.type = "button";
-  btnOpen.textContent = "Open";
-  btnOpen.addEventListener("click", () => openUrl(fullUrl));
-
-  const btnCopy = document.createElement("button");
-  btnCopy.className = "smallBtn";
-  btnCopy.type = "button";
-  btnCopy.textContent = "Copy";
-  btnCopy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      showOk("Copied URL.");
-    } catch (_) {
-      showErr("Could not copy (browser blocked clipboard).");
-    }
-  });
-
-  const btnPrint = document.createElement("button");
-  btnPrint.className = "smallBtn";
-  btnPrint.type = "button";
-  btnPrint.textContent = "Print";
-  btnPrint.addEventListener("click", () => printMagnet(qrPngUrl, label));
-
-  wrap.appendChild(btnOpen);
-  wrap.appendChild(btnCopy);
-  wrap.appendChild(btnPrint);
-
-  tdActions.appendChild(wrap);
-
-  tr.appendChild(tdLabel);
-  tr.appendChild(tdCreated);
-  tr.appendChild(tdId);
-  tr.appendChild(tdActions);
-
-  $listBody.appendChild(tr);
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fed Again — Admin QR Generator</title>
+
+<style>
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #ffffff;
+  margin: 0;
+  padding: 40px 20px;
+  color: #111;
 }
 
-          $listWrap.style.display = "block";
-        } catch (e) {
-          $listMeta.textContent = "";
-          showErr(e?.message || String(e));
-        } finally {
-          $refreshBtn.disabled = false;
-        }
-      }
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+}
 
-      $createBtn.addEventListener("click", () => createHousehold());
-      $clearBtn.addEventListener("click", () => {
-        $label.value = "";
-        $secret.value = "";
-        resetUI();
-      });
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
-      $copyBtn.addEventListener("click", () => copyUrl());
-      $openBtn.addEventListener("click", () => openUrl());
-      $printBtn.addEventListener("click", () => printMagnet());
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
 
-      $refreshBtn.addEventListener("click", () => loadList());
-      $toggleBtn.addEventListener("click", () => {
-        $listWrap.style.display = ($listWrap.style.display === "none" || !$listWrap.style.display) ? "block" : "none";
-      });
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
 
-      resetUI();
-    </script>
-  </body>
+button {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #111;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+button:hover {
+  background: #f3f4f6;
+}
+
+.ok {
+  color: #047857;
+  margin-top: 10px;
+}
+
+.error {
+  color: #b91c1c;
+  margin-top: 10px;
+}
+
+.magnetPreview {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.magnetTitle {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.magnetLabel {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 20px;
+  letter-spacing: 0.06em;
+}
+
+.magnetBrand {
+  font-size: 12px;
+  margin-top: 10px;
+  letter-spacing: 0.35em;
+  color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<h1>Fed Again — Admin QR Generator</h1>
+
+<div class="card">
+  <input id="label" placeholder="Household label (e.g. Pawsha's Fridge)" />
+  <input id="secret" type="password" placeholder="Admin secret" />
+  <button id="createBtn">Create household + QR</button>
+  <div id="status"></div>
+</div>
+
+<div id="result" class="card" style="display:none;">
+  <div><strong>Household URL</strong></div>
+  <div id="url"></div>
+  <br/>
+  <button id="printBtn">Print Fridge Magnet</button>
+
+  <div class="magnetPreview">
+    <div class="magnetTitle">Has 🐶 been Fed? Walked?</div>
+    <img id="qrImg" width="260" />
+    <div id="printLabel" class="magnetLabel"></div>
+    <div class="magnetBrand">FED AGAIN</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const $label = document.getElementById("label");
+const $secret = document.getElementById("secret");
+const $createBtn = document.getElementById("createBtn");
+const $status = document.getElementById("status");
+
+const $result = document.getElementById("result");
+const $url = document.getElementById("url");
+const $qrImg = document.getElementById("qrImg");
+const $printLabel = document.getElementById("printLabel");
+const $printBtn = document.getElementById("printBtn");
+
+async function createHousehold() {
+  $status.textContent = "";
+  $status.className = "";
+
+  try {
+    const res = await fetch("/api/create-household", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-secret": $secret.value
+      },
+      body: JSON.stringify({
+        label: $label.value
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Request failed");
+    }
+
+    $result.style.display = "block";
+    $url.textContent = data.url;
+    $qrImg.src = data.qrPngUrl;
+    $printLabel.textContent = ($label.value || "").toUpperCase();
+
+    $status.textContent = "Created. Print it and stick it on the fridge.";
+    $status.className = "ok";
+
+  } catch (err) {
+    $status.textContent = err.message;
+    $status.className = "error";
+  }
+}
+
+function printMagnet() {
+  window.print();
+}
+
+$createBtn.addEventListener("click", createHousehold);
+$printBtn.addEventListener("click", printMagnet);
+</script>
+
+</body>
 </html>
