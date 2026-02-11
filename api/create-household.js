@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== "POST") {
@@ -7,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
-  // Admin protection
+  // Simple admin protection (do NOT call this from your public webpage)
   const adminSecret = req.headers["x-admin-secret"];
   if (!process.env.ADMIN_SECRET) {
     return res.status(500).json({ error: "Missing ADMIN_SECRET env var on server." });
@@ -23,16 +21,23 @@ export default async function handler(req, res) {
   if (!SUPABASE_URL) return res.status(500).json({ error: "Missing SUPABASE_URL env var." });
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
-  // Public app URL
+  // Figure out your public app URL (prefer env var if you set it)
   const fallbackAppUrl = `https://${req.headers.host}`;
-  const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).trim().replace(/\/$/, "");
+  const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).replace(/\/$/, "");
+
+  // Optional label from request body
+  let label = null;
+  try {
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    if (typeof body.label === "string" && body.label.trim()) label = body.label.trim();
+    if (typeof body.name === "string" && body.name.trim()) label = body.name.trim(); // backward compat
+  } catch {
+    // ignore body parse errors
+  }
 
   try {
-    // Create edit key for this household
-    const editKey = crypto.randomBytes(16).toString("hex");
-
-    // Insert household with edit_key and return id + edit_key
-    const insertUrl = `${SUPABASE_URL}/rest/v1/households?select=id,edit_key`;
+    // Insert a new household row and return its id + label
+    const insertUrl = `${SUPABASE_URL}/rest/v1/households?select=id,label,edit_key`;
 
     const resp = await fetch(insertUrl, {
       method: "POST",
@@ -42,7 +47,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
-      body: JSON.stringify({ edit_key: editKey }),
+      body: JSON.stringify({ label }),
     });
 
     const text = await resp.text();
@@ -52,22 +57,25 @@ export default async function handler(req, res) {
 
     const rows = JSON.parse(text);
     const householdId = rows?.[0]?.id;
-    const returnedKey = rows?.[0]?.edit_key;
+    const editKey = rows?.[0]?.edit_key;
+    const savedLabel = rows?.[0]?.label ?? null;
 
-    if (!householdId || !returnedKey) {
-      return res.status(500).json({ error: "Insert worked but no household id / key returned." });
+    if (!householdId) {
+      return res.status(500).json({ error: "Insert worked but no household id returned." });
+    }
+    if (!editKey) {
+      return res.status(500).json({ error: "Insert worked but no edit_key returned." });
     }
 
-    // URL includes both h and k
     const householdUrl =
-      `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}&k=${encodeURIComponent(returnedKey)}`;
+      `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}&k=${encodeURIComponent(editKey)}`;
 
-    // QR image URL
     const qrPngUrl =
       `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(householdUrl)}`;
 
     return res.status(200).json({
       householdId,
+      label: savedLabel,
       url: householdUrl,
       qrPngUrl,
     });
