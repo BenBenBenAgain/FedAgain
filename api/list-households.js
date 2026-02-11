@@ -1,11 +1,9 @@
 export default async function handler(req, res) {
-  // Only allow GET
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed. Use GET." });
   }
 
-  // Admin protection
   const adminSecret = req.headers["x-admin-secret"];
   if (!process.env.ADMIN_SECRET) {
     return res.status(500).json({ error: "Missing ADMIN_SECRET env var on server." });
@@ -20,14 +18,14 @@ export default async function handler(req, res) {
   if (!SUPABASE_URL) return res.status(500).json({ error: "Missing SUPABASE_URL env var." });
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
-  // Pull recent households (newest first)
-  const select =
-    "id,label,edit_key,created_at,last_fed_at,last_walked_at";
-
-  const url =
-    `${SUPABASE_URL}/rest/v1/households?select=${encodeURIComponent(select)}&order=created_at.desc&limit=200`;
-
   try {
+    // pull back most recent first
+    const url =
+      `${SUPABASE_URL}/rest/v1/households` +
+      `?select=id,label,created_at` +
+      `&order=created_at.desc` +
+      `&limit=200`;
+
     const resp = await fetch(url, {
       method: "GET",
       headers: {
@@ -38,11 +36,11 @@ export default async function handler(req, res) {
 
     const text = await resp.text();
     if (!resp.ok) {
-      return res.status(500).json({ error: `Supabase fetch failed: ${text}` });
+      return res.status(500).json({ error: `Supabase select failed: ${text}` });
     }
 
     const rows = JSON.parse(text);
-    return res.status(200).json({ households: rows });
+    return res.status(200).json({ rows });
   } catch (e) {
     return res.status(500).json({ error: e?.message || String(e) });
   }
