@@ -13,10 +13,11 @@
         color: #111;
       }
       .wrap {
-        max-width: 640px;
+        max-width: 720px;
         margin: 0 auto;
         padding: 28px 18px 40px;
       }
+
       h1 {
         font-size: 22px;
         margin: 0 0 14px;
@@ -27,6 +28,7 @@
         color: #6b7280;
         font-size: 13px;
       }
+
       .card {
         border: 1px solid #e5e7eb;
         border-radius: 14px;
@@ -34,6 +36,7 @@
         background: #fff;
         margin: 12px 0;
       }
+
       label {
         display: block;
         font-size: 12px;
@@ -47,7 +50,9 @@
         border-radius: 12px;
         font-size: 14px;
         box-sizing: border-box;
+        margin-bottom: 10px;
       }
+
       button {
         appearance: none;
         border: 1px solid #111;
@@ -60,12 +65,14 @@
         cursor: pointer;
       }
       button:disabled { opacity: 0.5; cursor: not-allowed; }
+
       .row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
-        margin-top: 10px;
+        margin-top: 6px;
       }
+
       .err {
         margin-top: 10px;
         color: #b91c1c;
@@ -78,37 +85,57 @@
         font-size: 13px;
         display: none;
       }
-      .out {
-        display: none;
-      }
-      a {
-        word-break: break-all;
-      }
-      .qr {
+
+      .out { display: none; }
+      a { word-break: break-all; }
+
+      /* Print layout */
+      .printWrap {
         display: grid;
         place-items: center;
-        padding: 10px;
+        padding: 10px 10px 6px;
+      }
+      .printTitle {
+        font-size: 28px;
+        font-weight: 800;
+        text-align: center;
+        letter-spacing: -0.02em;
+        margin: 6px 0 18px;
+      }
+      .qrBox {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 14px;
+        background: #fff;
+        display: grid;
+        place-items: center;
       }
       img {
         width: 320px;
         max-width: 100%;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #fff;
-        padding: 10px;
       }
-      .hint {
-        color: #6b7280;
-        font-size: 12px;
-        margin-top: 8px;
+      .printLabel {
+        margin-top: 12px;
+        font-weight: 800;
         text-align: center;
+        font-size: 18px;
       }
+      .brand {
+        margin-top: 22px;
+        text-align: center;
+        letter-spacing: 0.22em;
+        font-size: 11px;
+        color: #9ca3af;
+        font-weight: 800;
+      }
+
       @media print {
-        body { background: #fff; }
         .no-print { display: none !important; }
         .wrap { max-width: none; padding: 0; }
-        .card { border: none; }
-        img { border: none; }
+        .card { border: none; margin: 0; padding: 0; }
+        .qrBox { border: none; }
       }
     </style>
   </head>
@@ -117,14 +144,17 @@
     <div class="wrap">
       <div class="no-print">
         <h1>Fed Again — Admin QR Generator</h1>
-        <p class="sub">Create a household link + QR (includes both <code>h</code> and <code>k</code>).</p>
+        <p class="sub">Create a labelled household QR (includes both <code>h</code> and <code>k</code>).</p>
 
         <div class="card">
+          <label for="label">Household label (prints under QR)</label>
+          <input id="label" type="text" placeholder="e.g. Mum & Dad / Pawsha Fridge / House 07" />
+
           <label for="secret">Admin secret (not stored)</label>
           <input id="secret" type="password" placeholder="Enter x-admin-secret value" />
 
           <div class="row">
-            <button id="createBtn">Create household + QR</button>
+            <button id="createBtn" type="button">Create household + QR</button>
             <button id="clearBtn" type="button">Clear</button>
           </div>
 
@@ -144,16 +174,22 @@
           </div>
         </div>
 
-        <div class="qr">
-          <div>
+        <div class="printWrap">
+          <div class="printTitle">Has 🐶 been Fed? Walked?</div>
+
+          <div class="qrBox">
             <img id="qrImg" alt="QR code" />
-            <div class="hint">Scan to link this device</div>
           </div>
+
+          <div class="printLabel" id="printLabel"></div>
+
+          <div class="brand">FED AGAIN</div>
         </div>
       </div>
     </div>
 
     <script>
+      const $label = document.getElementById("label");
       const $secret = document.getElementById("secret");
       const $createBtn = document.getElementById("createBtn");
       const $clearBtn = document.getElementById("clearBtn");
@@ -164,6 +200,7 @@
       const $out = document.getElementById("out");
       const $link = document.getElementById("link");
       const $qrImg = document.getElementById("qrImg");
+      const $printLabel = document.getElementById("printLabel");
 
       function showErr(msg) {
         $err.textContent = msg;
@@ -188,6 +225,9 @@
 
         try {
           const secret = $secret.value.trim();
+          const label = $label.value.trim();
+
+          if (!label) throw new Error("Enter a household label (so you don’t mix them up).");
           if (!secret) throw new Error("Enter the admin secret.");
 
           const resp = await fetch("/api/create-household", {
@@ -196,7 +236,7 @@
               "Content-Type": "application/json",
               "x-admin-secret": secret
             },
-            body: JSON.stringify({ name: "Fed Again Household" })
+            body: JSON.stringify({ label })
           });
 
           const text = await resp.text();
@@ -208,6 +248,7 @@
           $link.href = json.url;
           $link.textContent = json.url;
           $qrImg.src = json.qrPngUrl;
+          $printLabel.textContent = json.label || label;
 
           $out.style.display = "block";
           showOk("Created. Print it, stick it on the fridge, scan it on two phones.");
@@ -229,6 +270,7 @@
         $link.href = "#";
         $link.textContent = "—";
         $qrImg.removeAttribute("src");
+        $printLabel.textContent = "";
       }
 
       $createBtn.addEventListener("click", () => createHousehold().catch(e => showErr(e.message || String(e))));
