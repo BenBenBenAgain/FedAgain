@@ -13,7 +13,7 @@
         color: #111;
       }
       .wrap {
-        max-width: 780px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 28px 18px 60px;
       }
@@ -23,10 +23,8 @@
         margin: 0 0 8px;
         letter-spacing: -0.02em;
       }
-      .sub {
-        margin: 0 0 22px;
-        color: #6b7280;
-      }
+      .sub { margin: 0 0 22px; color: #6b7280; }
+
       .card {
         border: 1px solid #e5e7eb;
         border-radius: 14px;
@@ -34,6 +32,7 @@
         background: #fff;
         margin: 12px 0;
       }
+
       label {
         display: block;
         font-size: 13px;
@@ -51,18 +50,10 @@
         outline: none;
       }
       input:focus { border-color: #111; }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 14px;
-      }
-      .row3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-        margin-top: 14px;
-      }
+
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+      .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+
       button {
         appearance: none;
         border: 1px solid #111;
@@ -75,41 +66,14 @@
         cursor: pointer;
       }
       button:active { transform: translateY(1px); }
-      button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-      .ok {
-        margin-top: 10px;
-        color: #065f46;
-        font-size: 14px;
-        display: none;
-        font-weight: 700;
-      }
-      .err {
-        margin-top: 10px;
-        color: #b91c1c;
-        font-size: 14px;
-        display: none;
-        font-weight: 700;
-        white-space: pre-wrap;
-      }
+      .ok { margin-top: 10px; color: #065f46; font-size: 14px; display: none; font-weight: 700; }
+      .err { margin-top: 10px; color: #b91c1c; font-size: 14px; display: none; font-weight: 700; white-space: pre-wrap; }
 
-      .result {
-        display: none;
-        margin-top: 14px;
-      }
-      .result a {
-        word-break: break-all;
-      }
+      .result { display: none; margin-top: 14px; }
+      .result a { word-break: break-all; }
 
-      .qrWrap {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 14px;
-        align-items: start;
-      }
       .qrBox {
         border: 1px solid #e5e7eb;
         border-radius: 14px;
@@ -122,12 +86,47 @@
         max-width: 100%;
         margin: 0 auto;
       }
-      .tiny {
-        font-size: 12px;
-        color: #6b7280;
-        margin-top: 8px;
-        text-align: center;
+      .tiny { font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center; }
+
+      .mutedNote { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+      /* List */
+      .listHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
       }
+      .listWrap { display: none; margin-top: 12px; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th, td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: top;
+      }
+      th { color: #6b7280; font-weight: 700; font-size: 12px; }
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #374151;
+        background: #fff;
+      }
+      .smallBtn {
+        padding: 10px 10px;
+        font-size: 13px;
+        font-weight: 800;
+        border-radius: 10px;
+      }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
       /* ---------------- PRINT (FRIDGE MAGNET) ---------------- */
       @media print {
@@ -136,11 +135,10 @@
         .noPrint { display: none !important; }
         .printOnly { display: block !important; }
       }
-
       .printOnly { display: none; }
 
       .magnetPage {
-        width: 90mm;           /* fridge magnet-ish */
+        width: 90mm;
         height: 120mm;
         margin: 0 auto;
         border: 1px solid #e5e7eb;
@@ -151,39 +149,11 @@
         grid-template-rows: auto 1fr auto auto;
         gap: 6mm;
       }
-      .magTitle {
-        text-align: center;
-        font-weight: 900;
-        font-size: 18pt;
-        letter-spacing: -0.02em;
-      }
-      .magQR {
-        display: grid;
-        place-items: center;
-      }
-      .magQR img {
-        width: 70mm;
-        height: 70mm;
-      }
-      .magLabel {
-        text-align: center;
-        font-weight: 800;
-        font-size: 12pt;
-        color: #111;
-      }
-      .magBrand {
-        text-align: center;
-        letter-spacing: 0.22em;
-        font-size: 10pt;
-        color: #6b7280;
-        font-weight: 900;
-      }
-
-      .mutedNote {
-        font-size: 12px;
-        color: #6b7280;
-        margin-top: 6px;
-      }
+      .magTitle { text-align: center; font-weight: 900; font-size: 18pt; letter-spacing: -0.02em; }
+      .magQR { display: grid; place-items: center; }
+      .magQR img { width: 70mm; height: 70mm; }
+      .magLabel { text-align: center; font-weight: 800; font-size: 12pt; color: #111; }
+      .magBrand { text-align: center; letter-spacing: 0.22em; font-size: 10pt; color: #6b7280; font-weight: 900; }
     </style>
   </head>
 
@@ -193,6 +163,7 @@
         <h1>Fed Again — Admin QR Generator</h1>
         <p class="sub">Create a labelled household QR (includes both <b>h</b> and <b>k</b>) so updates are allowed.</p>
 
+        <!-- CREATE -->
         <div class="card">
           <label for="label">Household label (prints under QR)</label>
           <input id="label" placeholder="e.g., Pawsha’s Fridge / Mum’s House / Unit 3" />
@@ -219,19 +190,45 @@
                 <button id="printBtn" type="button">Print QR</button>
               </div>
 
-              <div class="qrWrap" style="margin-top:14px;">
-                <div class="qrBox">
-                  <img id="qrImg" alt="QR code" />
-                  <div class="tiny">Scan to link this device</div>
-                  <div class="mutedNote">
-                    Tip: Use a label you’ll recognize later (e.g. “Mum — Kitchen Fridge”).
-                  </div>
-                </div>
+              <div class="qrBox" style="margin-top:14px;">
+                <img id="qrImg" alt="QR code" />
+                <div class="tiny">Scan to link this device</div>
               </div>
 
               <div class="mutedNote" style="margin-top:10px;">
-                Want to re-print later? Keep your label consistent — we’ll add a “lookup by label” next (2 mins).
+                If you close this page, use the Household list below to find the same label and print again.
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIST -->
+        <div class="card">
+          <div class="listHead">
+            <div>
+              <div style="font-weight:800;">Household list</div>
+              <div class="mutedNote">Recent households from Supabase (label + created time). Use this to re-print.</div>
+            </div>
+            <div class="actions">
+              <button id="refreshBtn" class="smallBtn" type="button">Refresh list</button>
+              <button id="toggleBtn" class="smallBtn" type="button">Show/Hide</button>
+            </div>
+          </div>
+
+          <div class="listWrap" id="listWrap">
+            <div class="mutedNote" id="listMeta" style="margin:10px 0;"></div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Label</th>
+                    <th>Created</th>
+                    <th>Household</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="listBody"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -270,6 +267,12 @@
 
       const $printQrImg = document.getElementById("printQrImg");
       const $printLabel = document.getElementById("printLabel");
+
+      const $refreshBtn = document.getElementById("refreshBtn");
+      const $toggleBtn = document.getElementById("toggleBtn");
+      const $listWrap = document.getElementById("listWrap");
+      const $listBody = document.getElementById("listBody");
+      const $listMeta = document.getElementById("listMeta");
 
       let last = null;
 
@@ -340,7 +343,6 @@
 
           $qrImg.src = json.qrPngUrl;
 
-          // print layout uses same QR image
           $printQrImg.src = json.qrPngUrl;
           $printLabel.textContent = label;
 
@@ -360,21 +362,105 @@
         try {
           await navigator.clipboard.writeText(last.url);
           showOk("Copied URL.");
-        } catch (e) {
+        } catch (_) {
           showErr("Could not copy (browser blocked clipboard).");
         }
       }
 
-      function openUrl() {
+      function openUrl(url = null) {
         clearErr();
-        if (!last?.url) return;
-        window.open(last.url, "_blank", "noopener,noreferrer");
+        const u = url || last?.url;
+        if (!u) return;
+        window.open(u, "_blank", "noopener,noreferrer");
       }
 
-      function printMagnet() {
+      function printMagnet(qrPngUrl = null, label = null) {
         clearErr();
-        if (!last?.qrPngUrl) return showErr("Create a QR first.");
+        const qr = qrPngUrl || last?.qrPngUrl;
+        const lab = label || ($label.value || "").trim() || " ";
+        if (!qr) return showErr("No QR to print.");
+
+        $printQrImg.src = qr;
+        $printLabel.textContent = lab;
         window.print();
+      }
+
+      async function loadList() {
+        clearErr();
+        clearOk();
+
+        const secret = ($secret.value || "").trim();
+        if (!secret) return showErr("Enter admin secret (needed to load the list).");
+
+        $refreshBtn.disabled = true;
+        $listMeta.textContent = "Loading…";
+        $listBody.innerHTML = "";
+
+        try {
+          const resp = await fetch("/api/list-households", {
+            method: "GET",
+            headers: {
+              "x-admin-secret": secret
+            }
+          });
+
+          const text = await resp.text();
+          let json = null;
+          try { json = JSON.parse(text); } catch (_) {}
+
+          if (!resp.ok) {
+            const msg = json?.error ? json.error : text;
+            throw new Error(msg || "Request failed");
+          }
+
+          const rows = json.rows || [];
+          $listMeta.textContent = `Loaded ${rows.length} households.`;
+
+          for (const r of rows) {
+            const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
+            const label = r.label || "(no label)";
+            const id = r.id;
+
+            // We can’t rebuild a *working* QR without the edit key (k),
+            // so list is for labeling + reference. For printing, you should store qrPngUrl or edit_key.
+            // For now we still show ID + label.
+            const tr = document.createElement("tr");
+
+            const tdLabel = document.createElement("td");
+            tdLabel.textContent = label;
+
+            const tdCreated = document.createElement("td");
+            tdCreated.innerHTML = `<span class="pill">${created}</span>`;
+
+            const tdId = document.createElement("td");
+            tdId.textContent = id;
+
+            const tdActions = document.createElement("td");
+            const btnOpen = document.createElement("button");
+            btnOpen.className = "smallBtn";
+            btnOpen.type = "button";
+            btnOpen.textContent = "Open";
+            btnOpen.addEventListener("click", () => {
+              // Opens without k (read-only). Printing needs k unless you store it.
+              openUrl(`${location.origin}/?h=${encodeURIComponent(id)}`);
+            });
+
+            tdActions.appendChild(btnOpen);
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdCreated);
+            tr.appendChild(tdId);
+            tr.appendChild(tdActions);
+
+            $listBody.appendChild(tr);
+          }
+
+          $listWrap.style.display = "block";
+        } catch (e) {
+          $listMeta.textContent = "";
+          showErr(e?.message || String(e));
+        } finally {
+          $refreshBtn.disabled = false;
+        }
       }
 
       $createBtn.addEventListener("click", () => createHousehold());
@@ -387,6 +473,11 @@
       $copyBtn.addEventListener("click", () => copyUrl());
       $openBtn.addEventListener("click", () => openUrl());
       $printBtn.addEventListener("click", () => printMagnet());
+
+      $refreshBtn.addEventListener("click", () => loadList());
+      $toggleBtn.addEventListener("click", () => {
+        $listWrap.style.display = ($listWrap.style.display === "none" || !$listWrap.style.display) ? "block" : "none";
+      });
 
       resetUI();
     </script>
