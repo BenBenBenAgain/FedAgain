@@ -19,10 +19,9 @@ export default async function handler(req, res) {
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
   try {
-    // pull back most recent first
     const url =
       `${SUPABASE_URL}/rest/v1/households` +
-      `?select=id,label,created_at` +
+      `?select=id,label,created_at,edit_key` +
       `&order=created_at.desc` +
       `&limit=200`;
 
