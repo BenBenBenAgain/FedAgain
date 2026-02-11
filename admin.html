@@ -9,245 +9,242 @@
       body {
         margin: 0;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #fff;
+        background: #ffffff;
         color: #111;
       }
       .wrap {
-        max-width: 980px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 28px 18px 60px;
       }
       h1 {
+        font-size: 28px;
+        font-weight: 800;
         margin: 0 0 8px;
-        font-size: 34px;
         letter-spacing: -0.02em;
       }
-      .sub {
-        margin: 0 0 18px;
-        color: #6b7280;
-        font-size: 14px;
-      }
+      .sub { margin: 0 0 22px; color: #6b7280; }
+
       .card {
         border: 1px solid #e5e7eb;
-        border-radius: 16px;
+        border-radius: 14px;
         padding: 16px;
         background: #fff;
-        margin: 14px 0;
+        margin: 12px 0;
       }
+
       label {
         display: block;
         font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
+        color: #374151;
+        margin: 10px 0 6px;
+        font-weight: 600;
       }
       input {
         width: 100%;
         box-sizing: border-box;
-        padding: 12px 12px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #d1d5db;
         border-radius: 12px;
+        padding: 12px 12px;
         font-size: 16px;
         outline: none;
       }
       input:focus { border-color: #111; }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 12px;
-      }
+
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+      .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+
       button {
         appearance: none;
         border: 1px solid #111;
         background: #fff;
         color: #111;
         border-radius: 12px;
-        padding: 12px 12px;
+        padding: 14px 12px;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
       }
       button:active { transform: translateY(1px); }
       button:disabled { opacity: 0.5; cursor: not-allowed; }
-      .muted {
-        color: #6b7280;
-        font-size: 13px;
-      }
-      .ok {
-        margin-top: 10px;
-        color: #047857;
-        font-size: 13px;
-        display: none;
-      }
-      .err {
-        margin-top: 10px;
-        color: #b91c1c;
-        font-size: 13px;
-        display: none;
-        white-space: pre-wrap;
-      }
 
-      .resultGrid {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 16px;
-        align-items: start;
-        margin-top: 12px;
-      }
-      .mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-        font-size: 13px;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
+      .ok { margin-top: 10px; color: #065f46; font-size: 14px; display: none; font-weight: 700; }
+      .err { margin-top: 10px; color: #b91c1c; font-size: 14px; display: none; font-weight: 700; white-space: pre-wrap; }
+
+      .result { display: none; margin-top: 14px; }
+      .result a { word-break: break-all; }
+
       .qrBox {
         border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        padding: 12px;
-        display: grid;
-        place-items: center;
+        border-radius: 14px;
+        padding: 14px;
       }
-      .qrBox img { width: 100%; max-width: 320px; height: auto; }
+      .qrBox img {
+        display: block;
+        width: 280px;
+        height: 280px;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      .tiny { font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center; }
 
-      .sectionTitle {
+      .mutedNote { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+      /* List */
+      .listHead {
         display: flex;
-        align-items: baseline;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
+        flex-wrap: wrap;
       }
-      .sectionTitle h2 {
-        margin: 0;
-        font-size: 20px;
-        letter-spacing: -0.02em;
-      }
-
+      .listWrap { display: none; margin-top: 12px; }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
+        font-size: 14px;
       }
       th, td {
         text-align: left;
+        padding: 10px 8px;
         border-bottom: 1px solid #e5e7eb;
-        padding: 12px 10px;
-        vertical-align: middle;
+        vertical-align: top;
       }
-      th {
-        font-size: 12px;
-        color: #6b7280;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: none;
-      }
-      td .pill {
+      th { color: #6b7280; font-weight: 700; font-size: 12px; }
+      .pill {
         display: inline-block;
-        padding: 6px 10px;
+        padding: 4px 8px;
         border: 1px solid #e5e7eb;
         border-radius: 999px;
         font-size: 12px;
         color: #374151;
+        background: #fff;
       }
-      .actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
+      .smallBtn {
+        padding: 10px 10px;
+        font-size: 13px;
+        font-weight: 800;
+        border-radius: 10px;
       }
-      .btnSmall {
-        padding: 10px 12px;
-        font-size: 14px;
-        border-radius: 12px;
-      }
-      .rightBtns {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-      .brand {
-        margin-top: 26px;
-        text-align: center;
-        letter-spacing: 0.22em;
-        font-size: 11px;
-        color: #9ca3af;
-        font-weight: 700;
+      /* ---------------- PRINT (FRIDGE MAGNET) ---------------- */
+      @media print {
+        body { background: #fff; }
+        .wrap { padding: 0; max-width: none; }
+        .noPrint { display: none !important; }
+        .printOnly { display: block !important; }
       }
+      .printOnly { display: none; }
+
+      .magnetPage {
+        width: 90mm;
+        height: 120mm;
+        margin: 0 auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10mm 8mm;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-rows: auto 1fr auto auto;
+        gap: 6mm;
+      }
+      .magTitle { text-align: center; font-weight: 900; font-size: 18pt; letter-spacing: -0.02em; }
+      .magQR { display: grid; place-items: center; }
+      .magQR img { width: 70mm; height: 70mm; }
+      .magLabel { text-align: center; font-weight: 800; font-size: 12pt; color: #111; }
+      .magBrand { text-align: center; letter-spacing: 0.22em; font-size: 10pt; color: #6b7280; font-weight: 900; }
     </style>
   </head>
 
   <body>
     <div class="wrap">
-      <h1>Fed Again — Admin QR Generator</h1>
-      <p class="sub">Create a labelled household QR (includes both <b>h</b> and <b>k</b>) and re-print from the household list.</p>
+      <div class="noPrint">
+        <h1>Fed Again — Admin QR Generator</h1>
+        <p class="sub">Create a labelled household QR (includes both <b>h</b> and <b>k</b>) so updates are allowed.</p>
 
-      <div class="card">
-        <label for="label">Household label (prints under QR)</label>
-        <input id="label" placeholder="e.g. Pawsha's Fridge" />
+        <!-- CREATE -->
+        <div class="card">
+          <label for="label">Household label (prints under QR)</label>
+          <input id="label" placeholder="e.g., Pawsha’s Fridge / Mum’s House / Unit 3" />
 
-        <div style="height:12px"></div>
+          <label for="secret">Admin secret (not stored)</label>
+          <input id="secret" type="password" placeholder="ADMIN_SECRET" />
 
-        <label for="secret">Admin secret (not stored)</label>
-        <input id="secret" type="password" placeholder="Enter admin secret" />
+          <div class="row">
+            <button id="createBtn">Create household + QR</button>
+            <button id="clearBtn" type="button">Clear</button>
+          </div>
 
-        <div class="row">
-          <button id="createBtn">Create household + QR</button>
-          <button id="clearBtn">Clear</button>
+          <div class="ok" id="ok"></div>
+          <div class="err" id="err"></div>
+
+          <div class="result" id="result">
+            <div class="card">
+              <div style="font-weight:800; margin-bottom:8px;">Household URL</div>
+              <a id="urlLink" href="#" target="_blank" rel="noreferrer"></a>
+
+              <div class="row3">
+                <button id="copyBtn" type="button">Copy URL</button>
+                <button id="openBtn" type="button">Open</button>
+                <button id="printBtn" type="button">Print QR</button>
+              </div>
+
+              <div class="qrBox" style="margin-top:14px;">
+                <img id="qrImg" alt="QR code" />
+                <div class="tiny">Scan to link this device</div>
+              </div>
+
+              <div class="mutedNote" style="margin-top:10px;">
+                If you close this page, use the Household list below to find the same label and print again.
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="ok" id="ok"></div>
-        <div class="err" id="err"></div>
-
-        <div class="resultGrid" style="display:none" id="resultGrid">
-          <div>
-            <div class="muted" style="margin-bottom:6px">Household URL</div>
-            <div class="mono" id="urlOut"></div>
-
-            <div class="row" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
-              <button class="btnSmall" id="copyBtn">Copy URL</button>
-              <button class="btnSmall" id="openBtn">Open</button>
+        <!-- LIST -->
+        <div class="card">
+          <div class="listHead">
+            <div>
+              <div style="font-weight:800;">Household list</div>
+              <div class="mutedNote">Recent households from Supabase (label + created time). Use this to re-print.</div>
             </div>
-
-            <div class="row" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
-              <button class="btnSmall" id="printBtn">Print Magnet</button>
-              <button class="btnSmall" id="refreshListBtn2">Refresh list</button>
+            <div class="actions">
+              <button id="refreshBtn" class="smallBtn" type="button">Refresh list</button>
+              <button id="toggleBtn" class="smallBtn" type="button">Show/Hide</button>
             </div>
           </div>
 
-          <div class="qrBox">
-            <img id="qrImg" alt="QR code" />
+          <div class="listWrap" id="listWrap">
+            <div class="mutedNote" id="listMeta" style="margin:10px 0;"></div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Label</th>
+                    <th>Created</th>
+                    <th>Household</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="listBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="card" id="listCard">
-        <div class="sectionTitle">
-          <div>
-            <h2>Household list</h2>
-            <div class="muted">Recent households from Supabase (label + created time). Use this to re-print.</div>
-            <div class="muted" id="listMeta" style="margin-top:6px;">Not loaded.</div>
+      <!-- PRINT LAYOUT -->
+      <div class="printOnly">
+        <div class="magnetPage">
+          <div class="magTitle">Has 🐶 been Fed? Walked?</div>
+          <div class="magQR">
+            <img id="printQrImg" alt="QR code" />
           </div>
-          <div class="rightBtns">
-            <button class="btnSmall" id="refreshListBtn">Refresh list</button>
-            <button class="btnSmall" id="toggleListBtn">Show/Hide</button>
-          </div>
-        </div>
-
-        <div id="listWrap" style="margin-top:10px;">
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 26%;">Label</th>
-                <th style="width: 22%;">Created</th>
-                <th>Household</th>
-                <th style="width: 22%; text-align:right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="listBody"></tbody>
-          </table>
+          <div class="magLabel" id="printLabel"></div>
+          <div class="magBrand">FED AGAIN</div>
         </div>
       </div>
-
-      <div class="brand">FED AGAIN</div>
     </div>
 
     <script>
@@ -263,17 +260,19 @@
 
       const $ok = document.getElementById("ok");
       const $err = document.getElementById("err");
+      const $result = document.getElementById("result");
 
-      const $resultGrid = document.getElementById("resultGrid");
-      const $urlOut = document.getElementById("urlOut");
+      const $urlLink = document.getElementById("urlLink");
       const $qrImg = document.getElementById("qrImg");
 
-      const $refreshListBtn = document.getElementById("refreshListBtn");
-      const $refreshListBtn2 = document.getElementById("refreshListBtn2");
-      const $toggleListBtn = document.getElementById("toggleListBtn");
+      const $printQrImg = document.getElementById("printQrImg");
+      const $printLabel = document.getElementById("printLabel");
+
+      const $refreshBtn = document.getElementById("refreshBtn");
+      const $toggleBtn = document.getElementById("toggleBtn");
       const $listWrap = document.getElementById("listWrap");
-      const $listMeta = document.getElementById("listMeta");
       const $listBody = document.getElementById("listBody");
+      const $listMeta = document.getElementById("listMeta");
 
       let last = null;
 
@@ -294,6 +293,80 @@
         $err.style.display = "none";
       }
 
+      function resetUI() {
+        clearOk();
+        clearErr();
+        $result.style.display = "none";
+        last = null;
+        $urlLink.textContent = "";
+        $urlLink.href = "#";
+        $qrImg.src = "";
+        $printQrImg.src = "";
+        $printLabel.textContent = "";
+      }
+
+      async function createHousehold() {
+        clearOk();
+        clearErr();
+
+        const label = ($label.value || "").trim();
+        const secret = ($secret.value || "").trim();
+
+        if (!label) return showErr("Add a household label (so you don’t mix magnets up).");
+        if (!secret) return showErr("Enter admin secret.");
+
+        $createBtn.disabled = true;
+
+        try {
+          const resp = await fetch("/api/create-household", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-secret": secret
+            },
+            body: JSON.stringify({ label })
+          });
+
+          const text = await resp.text();
+          let json = null;
+          try { json = JSON.parse(text); } catch (_) {}
+
+          if (!resp.ok) {
+            const msg = json?.error ? json.error : text;
+            throw new Error(msg || "Request failed");
+          }
+
+          last = json;
+
+          $urlLink.textContent = json.url;
+          $urlLink.href = json.url;
+
+          $qrImg.src = json.qrPngUrl;
+
+          $printQrImg.src = json.qrPngUrl;
+          $printLabel.textContent = label;
+
+          $result.style.display = "block";
+          showOk("Created. Print it, stick it on the fridge, scan it on two phones.");
+
+        } catch (e) {
+          showErr(e?.message || String(e));
+        } finally {
+          $createBtn.disabled = false;
+        }
+      }
+
+      async function copyUrl() {
+        clearErr();
+        if (!last?.url) return;
+        try {
+          await navigator.clipboard.writeText(last.url);
+          showOk("Copied URL.");
+        } catch (_) {
+          showErr("Could not copy (browser blocked clipboard).");
+        }
+      }
+
       function openUrl(url = null) {
         clearErr();
         const u = url || last?.url;
@@ -301,11 +374,7 @@
         window.open(u, "_blank", "noopener,noreferrer");
       }
 
-      async function copyText(text) {
-        await navigator.clipboard.writeText(text);
-      }
-
-      function printMagnet(qrUrl, label) {
+     function printMagnet(qrUrl, label) {
   clearErr();
 
   const qr = qrUrl || last?.qrPngUrl;
@@ -386,77 +455,8 @@
 </html>`);
 
   w.document.close();
-      }
+}
 
-      async function createHousehold() {
-        clearErr();
-        clearOk();
-        $createBtn.disabled = true;
-
-        const label = ($label.value || "").trim();
-        const secret = ($secret.value || "").trim();
-        if (!secret) {
-          $createBtn.disabled = false;
-          return showErr("Enter admin secret.");
-        }
-
-        try {
-          const resp = await fetch("/api/create-household", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-admin-secret": secret
-            },
-            body: JSON.stringify({ label })
-          });
-
-          const text = await resp.text();
-          let json = null;
-          try { json = JSON.parse(text); } catch (_) {}
-
-          if (!resp.ok) {
-            const msg = json?.error ? json.error : text;
-            throw new Error(msg || "Request failed");
-          }
-
-          last = {
-            householdId: json.householdId,
-            url: json.url,
-            qrPngUrl: json.qrPngUrl,
-            label: label || json.label || ""
-          };
-
-          $resultGrid.style.display = "grid";
-          $urlOut.textContent = last.url;
-          $qrImg.src = last.qrPngUrl;
-
-          showOk("Created. Print it, stick it on the fridge, scan it on two phones.");
-
-          // refresh list so you can re-print later even if you close the page
-          loadList().catch(e => showErr(e.message || String(e)));
-        } catch (e) {
-          showErr(e.message || String(e));
-        } finally {
-          $createBtn.disabled = false;
-        }
-      }
-
-      function clearAll() {
-        clearErr();
-        clearOk();
-        last = null;
-        $label.value = "";
-        $resultGrid.style.display = "none";
-        $urlOut.textContent = "";
-        $qrImg.removeAttribute("src");
-      }
-
-      function fmtLocal(iso) {
-        if (!iso) return "—";
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return "—";
-        return d.toLocaleString();
-      }
 
       async function loadList() {
         clearErr();
@@ -465,15 +465,16 @@
         const secret = ($secret.value || "").trim();
         if (!secret) return showErr("Enter admin secret (needed to load the list).");
 
-        $refreshListBtn.disabled = true;
-        $refreshListBtn2.disabled = true;
+        $refreshBtn.disabled = true;
         $listMeta.textContent = "Loading…";
         $listBody.innerHTML = "";
 
         try {
           const resp = await fetch("/api/list-households", {
             method: "GET",
-            headers: { "x-admin-secret": secret }
+            headers: {
+              "x-admin-secret": secret
+            }
           });
 
           const text = await resp.text();
@@ -485,82 +486,102 @@
             throw new Error(msg || "Request failed");
           }
 
-          const rows = json?.rows || [];
+          const rows = json.rows || [];
           $listMeta.textContent = `Loaded ${rows.length} households.`;
 
           for (const r of rows) {
-            const tr = document.createElement("tr");
+  const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
+  const label = r.label || "(no label)";
+  const id = r.id;
+  const k = r.edit_key;
 
-            const tdLabel = document.createElement("td");
-            tdLabel.textContent = r.label || "(no label)";
+  const fullUrl = k
+    ? `${location.origin}/?h=${encodeURIComponent(id)}&k=${encodeURIComponent(k)}`
+    : `${location.origin}/?h=${encodeURIComponent(id)}`;
 
-            const tdCreated = document.createElement("td");
-            const pill = document.createElement("span");
-            pill.className = "pill";
-            pill.textContent = fmtLocal(r.created_at);
-            tdCreated.appendChild(pill);
+  const qrPngUrl =
+    `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`;
 
-            const tdId = document.createElement("td");
-            tdId.className = "mono";
-            tdId.textContent = r.id;
+  const tr = document.createElement("tr");
 
-            const tdActions = document.createElement("td");
-            tdActions.style.textAlign = "right";
-            const actions = document.createElement("div");
-            actions.className = "actions";
+  const tdLabel = document.createElement("td");
+  tdLabel.textContent = label;
 
-            const btnOpen = document.createElement("button");
-            btnOpen.className = "btnSmall";
-            btnOpen.textContent = "Open";
-            btnOpen.onclick = () => openUrl(r.url);
+  const tdCreated = document.createElement("td");
+  tdCreated.innerHTML = `<span class="pill">${created}</span>`;
 
-            const btnPrint = document.createElement("button");
-            btnPrint.className = "btnSmall";
-            btnPrint.textContent = "Print";
-            btnPrint.onclick = () => printMagnet(r.qrPngUrl, r.label || "");
+  const tdId = document.createElement("td");
+  tdId.textContent = id;
 
-            actions.appendChild(btnOpen);
-            actions.appendChild(btnPrint);
-            tdActions.appendChild(actions);
+  const tdActions = document.createElement("td");
+  const wrap = document.createElement("div");
+  wrap.className = "actions";
 
-            tr.appendChild(tdLabel);
-            tr.appendChild(tdCreated);
-            tr.appendChild(tdId);
-            tr.appendChild(tdActions);
+  const btnOpen = document.createElement("button");
+  btnOpen.className = "smallBtn";
+  btnOpen.type = "button";
+  btnOpen.textContent = "Open";
+  btnOpen.addEventListener("click", () => openUrl(fullUrl));
 
-            $listBody.appendChild(tr);
-          }
+  const btnCopy = document.createElement("button");
+  btnCopy.className = "smallBtn";
+  btnCopy.type = "button";
+  btnCopy.textContent = "Copy";
+  btnCopy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      showOk("Copied URL.");
+    } catch (_) {
+      showErr("Could not copy (browser blocked clipboard).");
+    }
+  });
+
+  const btnPrint = document.createElement("button");
+  btnPrint.className = "smallBtn";
+  btnPrint.type = "button";
+  btnPrint.textContent = "Print";
+  btnPrint.addEventListener("click", () => printMagnet(qrPngUrl, label));
+
+  wrap.appendChild(btnOpen);
+  wrap.appendChild(btnCopy);
+  wrap.appendChild(btnPrint);
+
+  tdActions.appendChild(wrap);
+
+  tr.appendChild(tdLabel);
+  tr.appendChild(tdCreated);
+  tr.appendChild(tdId);
+  tr.appendChild(tdActions);
+
+  $listBody.appendChild(tr);
+}
+
+          $listWrap.style.display = "block";
+        } catch (e) {
+          $listMeta.textContent = "";
+          showErr(e?.message || String(e));
         } finally {
-          $refreshListBtn.disabled = false;
-          $refreshListBtn2.disabled = false;
+          $refreshBtn.disabled = false;
         }
       }
 
-      // UI events
       $createBtn.addEventListener("click", () => createHousehold());
-      $clearBtn.addEventListener("click", () => clearAll());
-
-      $copyBtn.addEventListener("click", async () => {
-        try {
-          const u = last?.url;
-          if (!u) return;
-          await copyText(u);
-          showOk("Copied URL.");
-        } catch (e) {
-          showErr(e.message || String(e));
-        }
+      $clearBtn.addEventListener("click", () => {
+        $label.value = "";
+        $secret.value = "";
+        resetUI();
       });
 
+      $copyBtn.addEventListener("click", () => copyUrl());
       $openBtn.addEventListener("click", () => openUrl());
       $printBtn.addEventListener("click", () => printMagnet());
 
-      $refreshListBtn.addEventListener("click", () => loadList().catch(e => showErr(e.message || String(e))));
-      $refreshListBtn2.addEventListener("click", () => loadList().catch(e => showErr(e.message || String(e))));
-
-      $toggleListBtn.addEventListener("click", () => {
-        const isHidden = $listWrap.style.display === "none";
-        $listWrap.style.display = isHidden ? "block" : "none";
+      $refreshBtn.addEventListener("click", () => loadList());
+      $toggleBtn.addEventListener("click", () => {
+        $listWrap.style.display = ($listWrap.style.display === "none" || !$listWrap.style.display) ? "block" : "none";
       });
+
+      resetUI();
     </script>
   </body>
 </html>
