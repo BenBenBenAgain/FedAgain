@@ -7,91 +7,20 @@
     <title>Fed Again</title>
     <style>
       :root { color-scheme: light; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #ffffff;
-        color: #111;
-      }
-      .wrap {
-        max-width: 520px;
-        margin: 0 auto;
-        padding: 28px 18px 40px;
-      }
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        text-align: center;
-        margin: 6px 0 6px;
-        letter-spacing: -0.02em;
-      }
-      .sub {
-        text-align: center;
-        color: #6b7280;
-        font-size: 13px;
-        margin: 0 0 18px;
-      }
-      .card {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 14px;
-        background: #fff;
-        margin: 12px 0;
-      }
-      .label {
-        font-size: 12px;
-        color: #6b7280;
-        margin-bottom: 6px;
-      }
-      .value {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 14px;
-      }
-      button {
-        appearance: none;
-        border: 1px solid #111;
-        background: #fff;
-        color: #111;
-        border-radius: 12px;
-        padding: 14px 12px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-      }
+      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #ffffff; color: #111; }
+      .wrap { max-width: 520px; margin: 0 auto; padding: 28px 18px 40px; }
+      h1 { font-size: 28px; font-weight: 700; text-align: center; margin: 6px 0 6px; letter-spacing: -0.02em; }
+      .sub { text-align: center; color: #6b7280; font-size: 13px; margin: 0 0 18px; }
+      .card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px; background: #fff; margin: 12px 0; }
+      .label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+      .value { font-size: 16px; font-weight: 600; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+      button { appearance: none; border: 1px solid #111; background: #fff; color: #111; border-radius: 12px; padding: 14px 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
       button:active { transform: translateY(1px); }
-      button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .brand {
-        margin-top: 26px;
-        text-align: center;
-        letter-spacing: 0.22em;
-        font-size: 11px;
-        color: #9ca3af;
-        font-weight: 700;
-      }
-      .error {
-        margin-top: 10px;
-        color: #b91c1c;
-        font-size: 13px;
-        text-align: center;
-        display: none;
-      }
-      .reset {
-        text-align: center;
-        margin-top: 10px;
-        font-size: 12px;
-        color: #6b7280;
-        cursor: pointer;
-        text-decoration: underline;
-      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .brand { margin-top: 26px; text-align: center; letter-spacing: 0.22em; font-size: 11px; color: #9ca3af; font-weight: 700; }
+      .error { margin-top: 10px; color: #b91c1c; font-size: 13px; text-align: center; display: none; }
+      .reset { text-align: center; margin-top: 10px; font-size: 12px; color: #6b7280; cursor: pointer; text-decoration: underline; }
     </style>
   </head>
 
@@ -127,8 +56,6 @@
       const SUPABASE_URL = "https://ojdwizgygxcniegoqelh.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qZHdpemd5Z3hjbmllZ29xZWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjUwMzEsImV4cCI6MjA4NjI0MTAzMX0.SLk-MLG084LTAYy5qrEmyRd99vGoTZDxZahQ_pROjq4";
 
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
       const $lastFed = document.getElementById("lastFed");
       const $lastWalked = document.getElementById("lastWalked");
       const $fedBtn = document.getElementById("fedBtn");
@@ -136,15 +63,8 @@
       const $err = document.getElementById("err");
       const $resetBtn = document.getElementById("resetBtn");
 
-      function showErr(msg) {
-        $err.textContent = msg;
-        $err.style.display = "block";
-      }
-
-      function clearErr() {
-        $err.textContent = "";
-        $err.style.display = "none";
-      }
+      function showErr(msg) { $err.textContent = msg; $err.style.display = "block"; }
+      function clearErr() { $err.textContent = ""; $err.style.display = "none"; }
 
       function formatTime(iso) {
         if (!iso) return "—";
@@ -153,28 +73,51 @@
         return d.toLocaleString();
       }
 
-      function getHouseholdId() {
+      function getPairing() {
         const params = new URLSearchParams(window.location.search);
-        const fromUrl = params.get("h");
 
-        if (fromUrl) {
-          localStorage.setItem("householdId", fromUrl);
-          return fromUrl;
+        const hFromUrl = params.get("h");
+        const kFromUrl = params.get("k");
+
+        if (hFromUrl && kFromUrl) {
+          localStorage.setItem("householdId", hFromUrl);
+          localStorage.setItem("householdKey", kFromUrl);
+          return { householdId: hFromUrl, householdKey: kFromUrl };
         }
 
-        return localStorage.getItem("householdId");
+        const householdId = localStorage.getItem("householdId");
+        const householdKey = localStorage.getItem("householdKey");
+
+        if (!householdId || !householdKey || householdId === "null" || householdKey === "null") {
+          return { householdId: null, householdKey: null };
+        }
+
+        return { householdId, householdKey };
       }
 
-      let householdId = null;
+      function resetHousehold() {
+        localStorage.removeItem("householdId");
+        localStorage.removeItem("householdKey");
+        location.href = "/";
+      }
+
+      const { householdId, householdKey } = getPairing();
+
+      $fedBtn.disabled = !householdId || !householdKey;
+      $walkBtn.disabled = !householdId || !householdKey;
+
+      if (!householdId || !householdKey) {
+        showErr("Not connected yet. Scan your household QR code to link this device.");
+      }
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { "x-household-key": householdKey || "" } }
+      });
 
       async function loadHousehold() {
+        if (!householdId || !householdKey) return;
+
         clearErr();
-
-        householdId = getHouseholdId();
-
-        if (!householdId) {
-          throw new Error("Missing household id. Scan QR code to connect.");
-        }
 
         const { data, error } = await supabase
           .from("households")
@@ -183,13 +126,18 @@
           .maybeSingle();
 
         if (error) throw error;
-        if (!data) throw new Error("Household not found. Check QR code.");
+        if (!data) throw new Error("Household not found / not authorized. Re-scan QR code.");
 
         $lastFed.textContent = formatTime(data.last_fed_at);
         $lastWalked.textContent = formatTime(data.last_walked_at);
+
+        $fedBtn.disabled = false;
+        $walkBtn.disabled = false;
       }
 
       async function setFed() {
+        if (!householdId || !householdKey) { showErr("Scan QR code to connect."); return; }
+
         clearErr();
         $fedBtn.disabled = true;
         try {
@@ -207,6 +155,8 @@
       }
 
       async function setWalked() {
+        if (!householdId || !householdKey) { showErr("Scan QR code to connect."); return; }
+
         clearErr();
         $walkBtn.disabled = true;
         try {
@@ -221,11 +171,6 @@
         } finally {
           $walkBtn.disabled = false;
         }
-      }
-
-      function resetHousehold() {
-        localStorage.removeItem("householdId");
-        location.reload();
       }
 
       $fedBtn.addEventListener("click", () => setFed().catch(e => showErr(e.message || String(e))));
