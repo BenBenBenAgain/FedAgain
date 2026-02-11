@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== "POST") {
@@ -5,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
-  // Simple admin protection (do NOT call this from your public webpage)
+  // Admin protection (don't call this from your public webpage)
   const adminSecret = req.headers["x-admin-secret"];
   if (!process.env.ADMIN_SECRET) {
     return res.status(500).json({ error: "Missing ADMIN_SECRET env var on server." });
@@ -21,22 +23,25 @@ export default async function handler(req, res) {
   if (!SUPABASE_URL) return res.status(500).json({ error: "Missing SUPABASE_URL env var." });
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
+  // Read optional label from body
+  let label = null;
+  try {
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    label = typeof body.label === "string" ? body.label.trim() : null;
+    if (label === "") label = null;
+  } catch {
+    // ignore JSON parse errors; label stays null
+  }
+
   // Figure out your public app URL (prefer env var if you set it)
   const fallbackAppUrl = `https://${req.headers.host}`;
   const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).replace(/\/$/, "");
 
-  // Optional label from request body
-  let label = null;
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-    if (typeof body.label === "string" && body.label.trim()) label = body.label.trim();
-    if (typeof body.name === "string" && body.name.trim()) label = body.name.trim(); // backward compat
-  } catch {
-    // ignore body parse errors
-  }
+    // Generate an edit key (required by your NOT NULL constraint)
+    const editKey = crypto.randomBytes(16).toString("hex");
 
-  try {
-    // Insert a new household row and return its id + label
+    // Insert a new household row and return its id (uuid)
     const insertUrl = `${SUPABASE_URL}/rest/v1/households?select=id,label,edit_key`;
 
     const resp = await fetch(insertUrl, {
@@ -47,7 +52,10 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
-      body: JSON.stringify({ label }),
+      body: JSON.stringify({
+        label,
+        edit_key: editKey,
+      }),
     });
 
     const text = await resp.text();
@@ -57,19 +65,18 @@ export default async function handler(req, res) {
 
     const rows = JSON.parse(text);
     const householdId = rows?.[0]?.id;
-    const editKey = rows?.[0]?.edit_key;
-    const savedLabel = rows?.[0]?.label ?? null;
+    const savedLabel = rows?.[0]?.label ?? label ?? "";
+    const savedEditKey = rows?.[0]?.edit_key ?? editKey;
 
     if (!householdId) {
       return res.status(500).json({ error: "Insert worked but no household id returned." });
     }
-    if (!editKey) {
-      return res.status(500).json({ error: "Insert worked but no edit_key returned." });
-    }
 
+    // Your app reads: ?h=HOUSEHOLD_UUID&k=EDIT_KEY
     const householdUrl =
-      `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}&k=${encodeURIComponent(editKey)}`;
+      `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}&k=${encodeURIComponent(savedEditKey)}`;
 
+    // Simple QR image URL (no libraries needed)
     const qrPngUrl =
       `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(householdUrl)}`;
 
