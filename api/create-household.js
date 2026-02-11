@@ -21,8 +21,10 @@ export default async function handler(req, res) {
   if (!SUPABASE_URL) return res.status(500).json({ error: "Missing SUPABASE_URL env var." });
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
-  // Figure out your public app URL (prefer env var if you set it)
-  const fallbackAppUrl = `https://${req.headers.host}`;
+  // Figure out the public app URL from the incoming request (works for prod + previews)
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  const fallbackAppUrl = `${proto}://${host}`;
   const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).replace(/\/$/, "");
 
   try {
