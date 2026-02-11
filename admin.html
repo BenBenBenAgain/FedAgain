@@ -417,42 +417,71 @@
           $listMeta.textContent = `Loaded ${rows.length} households.`;
 
           for (const r of rows) {
-            const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
-            const label = r.label || "(no label)";
-            const id = r.id;
+  const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
+  const label = r.label || "(no label)";
+  const id = r.id;
+  const k = r.edit_key;
 
-            // We can’t rebuild a *working* QR without the edit key (k),
-            // so list is for labeling + reference. For printing, you should store qrPngUrl or edit_key.
-            // For now we still show ID + label.
-            const tr = document.createElement("tr");
+  const fullUrl = k
+    ? `${location.origin}/?h=${encodeURIComponent(id)}&k=${encodeURIComponent(k)}`
+    : `${location.origin}/?h=${encodeURIComponent(id)}`;
 
-            const tdLabel = document.createElement("td");
-            tdLabel.textContent = label;
+  const qrPngUrl =
+    `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`;
 
-            const tdCreated = document.createElement("td");
-            tdCreated.innerHTML = `<span class="pill">${created}</span>`;
+  const tr = document.createElement("tr");
 
-            const tdId = document.createElement("td");
-            tdId.textContent = id;
+  const tdLabel = document.createElement("td");
+  tdLabel.textContent = label;
 
-            const tdActions = document.createElement("td");
-            const btnOpen = document.createElement("button");
-            btnOpen.className = "smallBtn";
-            btnOpen.type = "button";
-            btnOpen.textContent = "Open";
-            btnOpen.addEventListener("click", () => {
-              // Opens without k (read-only). Printing needs k unless you store it.
-              openUrl(`${location.origin}/?h=${encodeURIComponent(id)}`);
-            });
+  const tdCreated = document.createElement("td");
+  tdCreated.innerHTML = `<span class="pill">${created}</span>`;
 
-            tdActions.appendChild(btnOpen);
-            tr.appendChild(tdLabel);
-            tr.appendChild(tdCreated);
-            tr.appendChild(tdId);
-            tr.appendChild(tdActions);
+  const tdId = document.createElement("td");
+  tdId.textContent = id;
 
-            $listBody.appendChild(tr);
-          }
+  const tdActions = document.createElement("td");
+  const wrap = document.createElement("div");
+  wrap.className = "actions";
+
+  const btnOpen = document.createElement("button");
+  btnOpen.className = "smallBtn";
+  btnOpen.type = "button";
+  btnOpen.textContent = "Open";
+  btnOpen.addEventListener("click", () => openUrl(fullUrl));
+
+  const btnCopy = document.createElement("button");
+  btnCopy.className = "smallBtn";
+  btnCopy.type = "button";
+  btnCopy.textContent = "Copy";
+  btnCopy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      showOk("Copied URL.");
+    } catch (_) {
+      showErr("Could not copy (browser blocked clipboard).");
+    }
+  });
+
+  const btnPrint = document.createElement("button");
+  btnPrint.className = "smallBtn";
+  btnPrint.type = "button";
+  btnPrint.textContent = "Print";
+  btnPrint.addEventListener("click", () => printMagnet(qrPngUrl, label));
+
+  wrap.appendChild(btnOpen);
+  wrap.appendChild(btnCopy);
+  wrap.appendChild(btnPrint);
+
+  tdActions.appendChild(wrap);
+
+  tr.appendChild(tdLabel);
+  tr.appendChild(tdCreated);
+  tr.appendChild(tdId);
+  tr.appendChild(tdActions);
+
+  $listBody.appendChild(tr);
+}
 
           $listWrap.style.display = "block";
         } catch (e) {
