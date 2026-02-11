@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head> <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐶</text></svg>">
+  <head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐶</text></svg>">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fed Again</title>
@@ -83,6 +84,14 @@
         text-align: center;
         display: none;
       }
+      .reset {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #6b7280;
+        cursor: pointer;
+        text-decoration: underline;
+      }
     </style>
   </head>
 
@@ -107,6 +116,7 @@
       </div>
 
       <div class="error" id="err"></div>
+      <div class="reset" id="resetBtn">Reset household</div>
 
       <div class="brand">FED AGAIN</div>
     </div>
@@ -114,8 +124,6 @@
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-      // These env vars are NOT automatically available in a plain static HTML page on Vercel.
-      // For now, paste your values directly here (they're meant to be public for anon access).
       const SUPABASE_URL = "https://ojdwizgygxcniegoqelh.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qZHdpemd5Z3hjbmllZ29xZWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjUwMzEsImV4cCI6MjA4NjI0MTAzMX0.SLk-MLG084LTAYy5qrEmyRd99vGoTZDxZahQ_pROjq4";
 
@@ -126,11 +134,13 @@
       const $fedBtn = document.getElementById("fedBtn");
       const $walkBtn = document.getElementById("walkBtn");
       const $err = document.getElementById("err");
+      const $resetBtn = document.getElementById("resetBtn");
 
       function showErr(msg) {
         $err.textContent = msg;
         $err.style.display = "block";
       }
+
       function clearErr() {
         $err.textContent = "";
         $err.style.display = "none";
@@ -142,35 +152,42 @@
         if (Number.isNaN(d.getTime())) return "—";
         return d.toLocaleString();
       }
-function getHouseholdIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("h");
-}
 
-let householdId = null;
+      function getHouseholdId() {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = params.get("h");
 
-async function loadHousehold() {
-  clearErr();
+        if (fromUrl) {
+          localStorage.setItem("householdId", fromUrl);
+          return fromUrl;
+        }
 
-  householdId = getHouseholdIdFromUrl();
-  if (!householdId) {
-    throw new Error("Missing household id in URL. Add ?h=HOUSEHOLD_UUID");
-  }
+        return localStorage.getItem("householdId");
+      }
 
-  const { data, error } = await supabase
-    .from("households")
-    .select("id,last_fed_at,last_walked_at")
-    .eq("id", householdId)
-    .maybeSingle();
+      let householdId = null;
 
-  if (error) throw error;
-  if (!data) throw new Error("Household not found. Check QR code URL.");
+      async function loadHousehold() {
+        clearErr();
 
-  $lastFed.textContent = formatTime(data.last_fed_at);
-  $lastWalked.textContent = formatTime(data.last_walked_at);
-}
+        householdId = getHouseholdId();
 
-      
+        if (!householdId) {
+          throw new Error("Missing household id. Scan QR code to connect.");
+        }
+
+        const { data, error } = await supabase
+          .from("households")
+          .select("id,last_fed_at,last_walked_at")
+          .eq("id", householdId)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) throw new Error("Household not found. Check QR code.");
+
+        $lastFed.textContent = formatTime(data.last_fed_at);
+        $lastWalked.textContent = formatTime(data.last_walked_at);
+      }
 
       async function setFed() {
         clearErr();
@@ -206,8 +223,14 @@ async function loadHousehold() {
         }
       }
 
+      function resetHousehold() {
+        localStorage.removeItem("householdId");
+        location.reload();
+      }
+
       $fedBtn.addEventListener("click", () => setFed().catch(e => showErr(e.message || String(e))));
       $walkBtn.addEventListener("click", () => setWalked().catch(e => showErr(e.message || String(e))));
+      $resetBtn.addEventListener("click", resetHousehold);
 
       loadHousehold().catch(e => showErr(e.message || String(e)));
     </script>
