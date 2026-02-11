@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== "POST") {
@@ -5,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
-  // Simple admin protection (do NOT call this from your public webpage)
+  // Admin protection
   const adminSecret = req.headers["x-admin-secret"];
   if (!process.env.ADMIN_SECRET) {
     return res.status(500).json({ error: "Missing ADMIN_SECRET env var on server." });
@@ -21,15 +23,16 @@ export default async function handler(req, res) {
   if (!SUPABASE_URL) return res.status(500).json({ error: "Missing SUPABASE_URL env var." });
   if (!SERVICE_ROLE) return res.status(500).json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY env var." });
 
-  // Figure out the public app URL from the incoming request (works for prod + previews)
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  const host = req.headers["x-forwarded-host"] || req.headers.host;
-  const fallbackAppUrl = `${proto}://${host}`;
-  const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).replace(/\/$/, "");
+  // Public app URL
+  const fallbackAppUrl = `https://${req.headers.host}`;
+  const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || fallbackAppUrl).trim().replace(/\/$/, "");
 
   try {
-    // Insert a new household row and return its id (uuid)
-    const insertUrl = `${SUPABASE_URL}/rest/v1/households?select=id`;
+    // Create edit key for this household
+    const editKey = crypto.randomBytes(16).toString("hex");
+
+    // Insert household with edit_key and return id + edit_key
+    const insertUrl = `${SUPABASE_URL}/rest/v1/households?select=id,edit_key`;
 
     const resp = await fetch(insertUrl, {
       method: "POST",
@@ -39,7 +42,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ edit_key: editKey }),
     });
 
     const text = await resp.text();
@@ -49,14 +52,17 @@ export default async function handler(req, res) {
 
     const rows = JSON.parse(text);
     const householdId = rows?.[0]?.id;
-    if (!householdId) {
-      return res.status(500).json({ error: "Insert worked but no household id returned." });
+    const returnedKey = rows?.[0]?.edit_key;
+
+    if (!householdId || !returnedKey) {
+      return res.status(500).json({ error: "Insert worked but no household id / key returned." });
     }
 
-    // Your app already reads: ?h=HOUSEHOLD_UUID
-    const householdUrl = `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}`;
+    // URL includes both h and k
+    const householdUrl =
+      `${PUBLIC_APP_URL}/?h=${encodeURIComponent(householdId)}&k=${encodeURIComponent(returnedKey)}`;
 
-    // Simple QR image URL (no libraries needed)
+    // QR image URL
     const qrPngUrl =
       `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(householdUrl)}`;
 
