@@ -71,6 +71,23 @@
         font-weight: 600;
       }
 
+      .valueRow {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .stamp {
+        opacity: 0;
+        transition: opacity 180ms ease;
+        font-size: 0.95em;
+        line-height: 1;
+      }
+
+      .stamp.show {
+        opacity: 1;
+      }
+
       .undoRow {
         margin-top: 8px;
         font-size: 12px;
@@ -162,7 +179,10 @@
 
       <div class="card">
         <div class="label">Last Fed</div>
-        <div class="value" id="lastFed">—</div>
+        <div class="value valueRow">
+          <span id="lastFed">—</span>
+          <span class="stamp" id="fedStamp" aria-hidden="true">🦴</span>
+        </div>
         <div class="undoRow" id="fedUndoRow">
           Changed by mistake? <button class="undoBtn" id="fedUndoBtn">Undo</button>
         </div>
@@ -170,7 +190,10 @@
 
       <div class="card">
         <div class="label">Last Walked</div>
-        <div class="value" id="lastWalked">—</div>
+        <div class="value valueRow">
+          <span id="lastWalked">—</span>
+          <span class="stamp" id="walkStamp" aria-hidden="true">🐕</span>
+        </div>
         <div class="undoRow" id="walkUndoRow">
           Changed by mistake? <button class="undoBtn" id="walkUndoBtn">Undo</button>
         </div>
@@ -207,6 +230,18 @@
 
       function showErr(msg) { $err.textContent = msg; $err.style.display = "block"; }
       function clearErr() { $err.textContent = ""; $err.style.display = "none"; }
+
+      function flashStamp(stampId) {
+        const el = document.getElementById(stampId);
+        if (!el) return;
+
+        el.classList.add("show");
+
+        window.clearTimeout(el._t);
+        el._t = window.setTimeout(() => {
+          el.classList.remove("show");
+        }, 1200);
+      }
 
       function formatTime(iso) {
         if (!iso) return "—";
@@ -346,6 +381,7 @@
           if (error) throw error;
 
           $lastFed.textContent = formatTime(now);
+          flashStamp("fedStamp");
           showUndo("fed");
           startUndoTimer("fed", 60000);
         } finally {
@@ -378,6 +414,7 @@
           if (error) throw error;
 
           $lastWalked.textContent = formatTime(now);
+          flashStamp("walkStamp");
           showUndo("walk");
           startUndoTimer("walk", 60000);
         } finally {
