@@ -359,6 +359,7 @@
 
         clearErr();
         $fedBtn.disabled = true;
+        flashStamp("fedStamp");
         try {
           const prev = ($lastFed.textContent === "—") ? null : null; // display string isn't reliable; we store from DB below
 
@@ -381,7 +382,7 @@
           if (error) throw error;
 
           $lastFed.textContent = formatTime(now);
-          flashStamp("fedStamp");
+          
           showUndo("fed");
           startUndoTimer("fed", 60000);
         } finally {
