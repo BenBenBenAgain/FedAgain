@@ -395,6 +395,7 @@
 
         clearErr();
         $walkBtn.disabled = true;
+        flashStamp("walkStamp");
         try {
           const { data: cur, error: curErr } = await supabase
             .from("households")
@@ -415,7 +416,7 @@
           if (error) throw error;
 
           $lastWalked.textContent = formatTime(now);
-          flashStamp("walkStamp");
+          
           showUndo("walk");
           startUndoTimer("walk", 60000);
         } finally {
