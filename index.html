@@ -312,6 +312,7 @@
           hideUndo(which);
           sessionStorage.removeItem(key);
           sessionStorage.removeItem(which === "fed" ? "fedPrev" : "walkPrev");
+          sessionStorage.removeItem(which === "fed" ? "fedCountPrev" : "walkCountPrev");
         }, ms);
 
         sessionStorage.setItem(key, String(t));
@@ -337,7 +338,7 @@
 
         const { data, error } = await supabase
           .from("households")
-          .select("id,last_fed_at,last_walked_at")
+          .select("id,last_fed_at,last_walked_at,fed_count,walk_count")
           .eq("id", householdId)
           .maybeSingle();
 
@@ -365,18 +366,19 @@
 
           const { data: cur, error: curErr } = await supabase
             .from("households")
-            .select("last_fed_at")
+            .select("last_fed_at,fed_count")
             .eq("id", householdId)
             .maybeSingle();
 
           if (curErr) throw curErr;
 
           sessionStorage.setItem("fedPrev", cur?.last_fed_at || "");
+          sessionStorage.setItem("fedCountPrev", String(cur?.fed_count ?? 0));
 
           const now = new Date().toISOString();
           const { error } = await supabase
             .from("households")
-            .update({ last_fed_at: now })
+            .update({ last_fed_at: now, fed_count: (cur?.fed_count ?? 0) + 1 })
             .eq("id", householdId);
 
           if (error) throw error;
@@ -399,18 +401,19 @@
         try {
           const { data: cur, error: curErr } = await supabase
             .from("households")
-            .select("last_walked_at")
+            .select("last_walked_at,walk_count")
             .eq("id", householdId)
             .maybeSingle();
 
           if (curErr) throw curErr;
 
           sessionStorage.setItem("walkPrev", cur?.last_walked_at || "");
+          sessionStorage.setItem("walkCountPrev", String(cur?.walk_count ?? 0));
 
           const now = new Date().toISOString();
           const { error } = await supabase
             .from("households")
-            .update({ last_walked_at: now })
+            .update({ last_walked_at: now, walk_count: (cur?.walk_count ?? 0) + 1 })
             .eq("id", householdId);
 
           if (error) throw error;
@@ -428,11 +431,12 @@
         if (!householdId || !householdKey) return;
 
         const prev = sessionStorage.getItem("fedPrev");
+        const prevCount = Number(sessionStorage.getItem("fedCountPrev") || "0");
         $fedUndoBtn.disabled = true;
         try {
           const { error } = await supabase
             .from("households")
-            .update({ last_fed_at: prev || null })
+            .update({ last_fed_at: prev || null, fed_count: prevCount })
             .eq("id", householdId);
 
           if (error) throw error;
@@ -440,6 +444,7 @@
           $lastFed.textContent = formatTime(prev || null);
           hideUndo("fed");
           sessionStorage.removeItem("fedPrev");
+          sessionStorage.removeItem("fedCountPrev");
         } finally {
           $fedUndoBtn.disabled = false;
         }
@@ -449,11 +454,12 @@
         if (!householdId || !householdKey) return;
 
         const prev = sessionStorage.getItem("walkPrev");
+        const prevCount = Number(sessionStorage.getItem("walkCountPrev") || "0");
         $walkUndoBtn.disabled = true;
         try {
           const { error } = await supabase
             .from("households")
-            .update({ last_walked_at: prev || null })
+            .update({ last_walked_at: prev || null, walk_count: prevCount })
             .eq("id", householdId);
 
           if (error) throw error;
@@ -461,6 +467,7 @@
           $lastWalked.textContent = formatTime(prev || null);
           hideUndo("walk");
           sessionStorage.removeItem("walkPrev");
+          sessionStorage.removeItem("walkCountPrev");
         } finally {
           $walkUndoBtn.disabled = false;
         }
