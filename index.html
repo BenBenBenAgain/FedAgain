@@ -206,7 +206,7 @@
       </div>
 
       <div class="error" id="err"></div>
-      <div class="reset" id="resetBtn">Reset household</div>
+      
 <div class="reset" id="installBtn" style="display:none;">Save to Home Screen</div>
       <div class="brand">FED AGAIN</div>
     </div>
@@ -485,7 +485,7 @@
       $walkBtn.addEventListener("click", () => setWalked().catch(e => showErr(e.message || String(e))));
       $fedUndoBtn.addEventListener("click", () => undoFed().catch(e => showErr(e.message || String(e))));
       $walkUndoBtn.addEventListener("click", () => undoWalk().catch(e => showErr(e.message || String(e))));
-      $resetBtn.addEventListener("click", resetHousehold);
+      
 let deferredPrompt = null;
 const $installBtn = document.getElementById("installBtn");
 
