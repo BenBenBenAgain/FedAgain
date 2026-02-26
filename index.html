@@ -206,7 +206,7 @@
 
       <div class="error" id="err"></div>
       <div class="reset" id="resetBtn">Reset household</div>
-
+<div class="reset" id="installBtn" style="display:none;">Save to Home Screen</div>
       <div class="brand">FED AGAIN</div>
     </div>
 
@@ -485,7 +485,43 @@
       $fedUndoBtn.addEventListener("click", () => undoFed().catch(e => showErr(e.message || String(e))));
       $walkUndoBtn.addEventListener("click", () => undoWalk().catch(e => showErr(e.message || String(e))));
       $resetBtn.addEventListener("click", resetHousehold);
+let deferredPrompt = null;
+const $installBtn = document.getElementById("installBtn");
 
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isInStandaloneMode() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+if ($installBtn && isInStandaloneMode()) {
+  $installBtn.style.display = "none";
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if ($installBtn && !isInStandaloneMode()) $installBtn.style.display = "block";
+});
+
+if ($installBtn) {
+  if (isIos() && !isInStandaloneMode()) {
+    $installBtn.style.display = "block";
+  }
+
+  $installBtn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      $installBtn.style.display = "none";
+    } else {
+      alert("On iPhone: tap Share → Add to Home Screen");
+    }
+  });
+}
       loadHousehold().catch(e => showErr(e.message || String(e)));
     </script>
   </body>
