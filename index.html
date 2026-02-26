@@ -222,6 +222,7 @@
       const $walkBtn = document.getElementById("walkBtn");
       const $err = document.getElementById("err");
       const $resetBtn = document.getElementById("resetBtn");
+      const $sub = document.querySelector(".sub");
 
       const $fedUndoRow = document.getElementById("fedUndoRow");
       const $walkUndoRow = document.getElementById("walkUndoRow");
@@ -260,7 +261,8 @@
         if (hours < 24) return remMins ? `${hours}h ${remMins}m ago` : `${hours}h ago`;
 
         const days = Math.floor(hours / 24);
-        if (days < 14) return `${days}d ago`;
+        const remHours = hours % 24;
+        if (days < 14) return remHours ? `${days}d ${remHours}h` : `${days}d`;
 
         const weeks = Math.floor(days / 7);
         return `${weeks}w ago`;
@@ -338,12 +340,17 @@
 
         const { data, error } = await supabase
           .from("households")
-          .select("id,last_fed_at,last_walked_at,fed_count,walk_count")
+          .select("id,label,last_fed_at,last_walked_at,fed_count,walk_count")
           .eq("id", householdId)
           .maybeSingle();
 
         if (error) throw error;
         if (!data) throw new Error("Household not found / not authorized. Re-scan QR code.");
+
+        if (data.label) {
+          document.title = `Fed Again — ${data.label}`;
+          if ($sub) $sub.textContent = `${data.label} — tap to update.`;
+        }
 
         $lastFed.textContent = formatTime(data.last_fed_at);
         $lastWalked.textContent = formatTime(data.last_walked_at);
