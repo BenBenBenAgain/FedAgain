@@ -170,6 +170,85 @@
         cursor: pointer;
         text-decoration: underline;
       }
+
+      /* Install modal */
+      .modalBackdrop{
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        z-index: 9999;
+      }
+
+      .modalBackdrop.show{ display: flex; }
+
+      .modal{
+        width: 100%;
+        max-width: 420px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      }
+
+      .modalTitle{
+        font-size: 16px;
+        font-weight: 800;
+        margin: 0 0 6px;
+        letter-spacing: -0.01em;
+      }
+
+      .modalText{
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .modalSteps{
+        margin: 0;
+        padding-left: 18px;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .modalHint{
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .modalActions{
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .modalBtn{
+        appearance: none;
+        border-radius: 12px;
+        padding: 12px 12px;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        flex: 1;
+      }
+
+      .modalBtnPrimary{
+        border-color: var(--primary);
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .modalBtnPrimary:hover{ background: var(--primary-hover); }
     </style>
   </head>
 
@@ -206,8 +285,29 @@
       </div>
 
       <div class="error" id="err"></div>
-      
-<div class="reset" id="installBtn" style="display:none;">Save to Home Screen</div>
+
+      <div class="reset" id="installBtn" style="display:none;">Add to Home Screen (1-tap access)</div>
+
+      <div class="modalBackdrop" id="installModal" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+        <div class="modal">
+          <div class="modalTitle" id="installTitle">Add to Home Screen</div>
+          <p class="modalText">Faster access next time — no need to scan the QR every time.</p>
+
+          <ol class="modalSteps">
+            <li>Tap <strong>Share</strong> (square with the arrow up)</li>
+            <li>Scroll and tap <strong>Add to Home Screen</strong></li>
+            <li>Tap <strong>Add</strong></li>
+          </ol>
+
+          <div class="modalHint">If you don’t see “Add to Home Screen”, open this page in <strong>Safari</strong>.</div>
+
+          <div class="modalActions">
+            <button class="modalBtn" id="installCloseBtn" type="button">Not now</button>
+            <button class="modalBtn modalBtnPrimary" id="installOkBtn" type="button">Got it</button>
+          </div>
+        </div>
+      </div>
+
       <div class="brand">FED AGAIN</div>
     </div>
 
@@ -215,7 +315,7 @@
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
       const SUPABASE_URL = "https://ojdwizgygxcniegoqelh.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qZHdpemd5Z3hjbmllZ29xZWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjUwMzEsImV4cCI6MjA4NjI0MTAzMX0.SLk-MLG084LTAYy5qrEmyRd99vGoTZDxZahQ_pROjq4";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsImVyZiI6Im9qZHdpemd5Z3hjbmllZ29xZWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjUwMzEsImV4cCI6MjA4NjI0MTAzMX0.SLk-MLG084LTAYy5qrEmyRd99vGoTZDxZahQ_pROjq4";
 
       const $lastFed = document.getElementById("lastFed");
       const $lastWalked = document.getElementById("lastWalked");
@@ -370,8 +470,6 @@
         $fedBtn.disabled = true;
         flashStamp("fedStamp");
         try {
-          const prev = ($lastFed.textContent === "—") ? null : null; // display string isn't reliable; we store from DB below
-
           const { data: cur, error: curErr } = await supabase
             .from("households")
             .select("last_fed_at,fed_count")
@@ -392,7 +490,7 @@
           if (error) throw error;
 
           $lastFed.textContent = formatTime(now);
-          
+
           showUndo("fed");
           startUndoTimer("fed", 60000);
         } finally {
@@ -427,7 +525,7 @@
           if (error) throw error;
 
           $lastWalked.textContent = formatTime(now);
-          
+
           showUndo("walk");
           startUndoTimer("walk", 60000);
         } finally {
@@ -485,44 +583,72 @@
       $walkBtn.addEventListener("click", () => setWalked().catch(e => showErr(e.message || String(e))));
       $fedUndoBtn.addEventListener("click", () => undoFed().catch(e => showErr(e.message || String(e))));
       $walkUndoBtn.addEventListener("click", () => undoWalk().catch(e => showErr(e.message || String(e))));
-      
-let deferredPrompt = null;
-const $installBtn = document.getElementById("installBtn");
 
-function isIos() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
+      let deferredPrompt = null;
+      const $installBtn = document.getElementById("installBtn");
 
-function isInStandaloneMode() {
-  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-}
+      function isIos() {
+        return /iphone|ipad|ipod/i.test(navigator.userAgent);
+      }
 
-if ($installBtn && isInStandaloneMode()) {
-  $installBtn.style.display = "none";
-}
+      function isInStandaloneMode() {
+        return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      }
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if ($installBtn && !isInStandaloneMode()) $installBtn.style.display = "block";
-});
+      const $installModal = document.getElementById("installModal");
+      const $installCloseBtn = document.getElementById("installCloseBtn");
+      const $installOkBtn = document.getElementById("installOkBtn");
 
-if ($installBtn) {
-  if (isIos() && !isInStandaloneMode()) {
-    $installBtn.style.display = "block";
-  }
+      function openInstallModal(){
+        if (!$installModal) return;
+        $installModal.classList.add("show");
+      }
 
-  $installBtn.addEventListener("click", async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      $installBtn.style.display = "none";
-    } else {
-      alert("On iPhone: tap the square-with-arrow icon in the top right, then scroll down and tap 'Add to Home Screen'");
-    }
-  });
-}
+      function closeInstallModal(){
+        if (!$installModal) return;
+        $installModal.classList.remove("show");
+      }
+
+      if ($installModal) {
+        $installModal.addEventListener("click", (e) => {
+          if (e.target === $installModal) closeInstallModal();
+        });
+      }
+
+      if ($installCloseBtn) $installCloseBtn.addEventListener("click", closeInstallModal);
+      if ($installOkBtn) $installOkBtn.addEventListener("click", closeInstallModal);
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeInstallModal();
+      });
+
+      if ($installBtn && isInStandaloneMode()) {
+        $installBtn.style.display = "none";
+      }
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if ($installBtn && !isInStandaloneMode()) $installBtn.style.display = "block";
+      });
+
+      if ($installBtn) {
+        if (isIos() && !isInStandaloneMode()) {
+          $installBtn.style.display = "block";
+        }
+
+        $installBtn.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            $installBtn.style.display = "none";
+          } else {
+            openInstallModal();
+          }
+        });
+      }
+
       loadHousehold().catch(e => showErr(e.message || String(e)));
     </script>
   </body>
