@@ -128,32 +128,95 @@
       }
       .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-      /* ---------------- PRINT (FRIDGE MAGNET) ---------------- */
-      @media print {
-        body { background: #fff; }
-        .wrap { padding: 0; max-width: none; }
-        .noPrint { display: none !important; }
-        .printOnly { display: block !important; }
+      /* ---------------- PRINT ---------------- */
+      @page {
+        margin: 0;
       }
+
+      @media print {
+        html, body {
+          background: #fff;
+        }
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .wrap {
+          padding: 0;
+          max-width: none;
+        }
+        .noPrint { display: none !important; }
+        .printOnly {
+          display: grid !important;
+          min-height: 100vh;
+          place-items: center;
+          padding: 0;
+        }
+      }
+
       .printOnly { display: none; }
 
       .magnetPage {
-        width: 90mm;
-        height: 120mm;
+        width: 85mm;
+        height: 110mm;
         margin: 0 auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 10mm 8mm;
+        border: 1px solid #E2E8D5;
+        border-radius: 16px;
+        padding: 9mm 7mm;
         box-sizing: border-box;
         display: grid;
-        grid-template-rows: auto 1fr auto auto;
-        gap: 6mm;
+        grid-template-rows: auto auto 1fr auto auto;
+        gap: 4mm;
+        background: #F7F9F4;
+        box-shadow:
+          inset 0 0 0 2px #ffffff,
+          0 1px 2px rgba(0,0,0,0.05);
       }
-      .magTitle { text-align: center; font-weight: 900; font-size: 18pt; letter-spacing: -0.02em; }
-      .magQR { display: grid; place-items: center; }
-      .magQR img { width: 70mm; height: 70mm; }
-      .magLabel { text-align: center; font-weight: 800; font-size: 12pt; color: #111; }
-      .magBrand { text-align: center; letter-spacing: 0.22em; font-size: 10pt; color: #6b7280; font-weight: 900; }
+
+      .magTitle {
+        text-align: center;
+        font-size: 16pt;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: #1C1917;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .magSub {
+        text-align: center;
+        font-size: 11pt;
+        font-weight: 700;
+        line-height: 1.35;
+        color: #374151;
+      }
+
+      .magQR {
+        display: grid;
+        place-items: center;
+      }
+
+      .magQR img {
+        width: 58mm;
+        height: 58mm;
+        margin: 2mm 0;
+        display: block;
+      }
+
+      .magFooter {
+        text-align: center;
+        font-size: 9pt;
+        color: #6b7280;
+        font-weight: 700;
+      }
+
+      .magBrand {
+        text-align: center;
+        letter-spacing: 0.25em;
+        font-size: 8pt;
+        color: #4D7C0F;
+        font-weight: 900;
+      }
     </style>
   </head>
 
@@ -165,8 +228,8 @@
 
         <!-- CREATE -->
         <div class="card">
-          <label for="label">Household label (prints under QR)</label>
-          <input id="label" placeholder="e.g., Pawsha’s Fridge / Mum’s House / Unit 3" />
+          <label for="label">Household label (prints on QR card)</label>
+          <input id="label" placeholder="e.g., Pawsha / Molly / Buddy" />
 
           <label for="secret">Admin secret (not stored)</label>
           <input id="secret" type="password" placeholder="ADMIN_SECRET" />
@@ -237,11 +300,19 @@
       <!-- PRINT LAYOUT -->
       <div class="printOnly">
         <div class="magnetPage">
-          <div class="magTitle">Has 🐶 been Fed? Walked?</div>
+          <div class="magTitle" id="printTitle"></div>
+
+          <div class="magSub">
+            Has 🐶 been fed?<br />
+            Has 🐕 been walked?
+          </div>
+
           <div class="magQR">
             <img id="printQrImg" alt="QR code" />
           </div>
-          <div class="magLabel" id="printLabel"></div>
+
+          <div class="magFooter">Scan to check &amp; update</div>
+
           <div class="magBrand">FED AGAIN</div>
         </div>
       </div>
@@ -266,7 +337,7 @@
       const $qrImg = document.getElementById("qrImg");
 
       const $printQrImg = document.getElementById("printQrImg");
-      const $printLabel = document.getElementById("printLabel");
+      const $printTitle = document.getElementById("printTitle");
 
       const $refreshBtn = document.getElementById("refreshBtn");
       const $toggleBtn = document.getElementById("toggleBtn");
@@ -293,6 +364,12 @@
         $err.style.display = "none";
       }
 
+      function getPrintTitle(label) {
+        const clean = (label || "").trim();
+        if (!clean) return "Dog’s Care Check-In";
+        return `${clean}’s Care Check-In`;
+      }
+
       function resetUI() {
         clearOk();
         clearErr();
@@ -302,7 +379,7 @@
         $urlLink.href = "#";
         $qrImg.src = "";
         $printQrImg.src = "";
-        $printLabel.textContent = "";
+        $printTitle.textContent = "";
       }
 
       async function createHousehold() {
@@ -344,7 +421,7 @@
           $qrImg.src = json.qrPngUrl;
 
           $printQrImg.src = json.qrPngUrl;
-          $printLabel.textContent = label;
+          $printTitle.textContent = getPrintTitle(label);
 
           $result.style.display = "block";
           showOk("Created. Print it, stick it on the fridge, scan it on two phones.");
@@ -377,11 +454,11 @@
       function printMagnet(qrPngUrl = null, label = null) {
         clearErr();
         const qr = qrPngUrl || last?.qrPngUrl;
-        const lab = label || ($label.value || "").trim() || " ";
+        const lab = label || ($label.value || "").trim() || "";
         if (!qr) return showErr("No QR to print.");
 
         $printQrImg.src = qr;
-        $printLabel.textContent = lab;
+        $printTitle.textContent = getPrintTitle(lab);
         window.print();
       }
 
@@ -417,71 +494,71 @@
           $listMeta.textContent = `Loaded ${rows.length} households.`;
 
           for (const r of rows) {
-  const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
-  const label = r.label || "(no label)";
-  const id = r.id;
-  const k = r.edit_key;
+            const created = r.created_at ? new Date(r.created_at).toLocaleString() : "—";
+            const label = r.label || "(no label)";
+            const id = r.id;
+            const k = r.edit_key;
 
-  const fullUrl = k
-    ? `${location.origin}/?h=${encodeURIComponent(id)}&k=${encodeURIComponent(k)}`
-    : `${location.origin}/?h=${encodeURIComponent(id)}`;
+            const fullUrl = k
+              ? `${location.origin}/?h=${encodeURIComponent(id)}&k=${encodeURIComponent(k)}`
+              : `${location.origin}/?h=${encodeURIComponent(id)}`;
 
-  const qrPngUrl =
-    `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`;
+            const qrPngUrl =
+              `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(fullUrl)}`;
 
-  const tr = document.createElement("tr");
+            const tr = document.createElement("tr");
 
-  const tdLabel = document.createElement("td");
-  tdLabel.textContent = label;
+            const tdLabel = document.createElement("td");
+            tdLabel.textContent = label;
 
-  const tdCreated = document.createElement("td");
-  tdCreated.innerHTML = `<span class="pill">${created}</span>`;
+            const tdCreated = document.createElement("td");
+            tdCreated.innerHTML = `<span class="pill">${created}</span>`;
 
-  const tdId = document.createElement("td");
-  tdId.textContent = id;
+            const tdId = document.createElement("td");
+            tdId.textContent = id;
 
-  const tdActions = document.createElement("td");
-  const wrap = document.createElement("div");
-  wrap.className = "actions";
+            const tdActions = document.createElement("td");
+            const wrap = document.createElement("div");
+            wrap.className = "actions";
 
-  const btnOpen = document.createElement("button");
-  btnOpen.className = "smallBtn";
-  btnOpen.type = "button";
-  btnOpen.textContent = "Open";
-  btnOpen.addEventListener("click", () => openUrl(fullUrl));
+            const btnOpen = document.createElement("button");
+            btnOpen.className = "smallBtn";
+            btnOpen.type = "button";
+            btnOpen.textContent = "Open";
+            btnOpen.addEventListener("click", () => openUrl(fullUrl));
 
-  const btnCopy = document.createElement("button");
-  btnCopy.className = "smallBtn";
-  btnCopy.type = "button";
-  btnCopy.textContent = "Copy";
-  btnCopy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      showOk("Copied URL.");
-    } catch (_) {
-      showErr("Could not copy (browser blocked clipboard).");
-    }
-  });
+            const btnCopy = document.createElement("button");
+            btnCopy.className = "smallBtn";
+            btnCopy.type = "button";
+            btnCopy.textContent = "Copy";
+            btnCopy.addEventListener("click", async () => {
+              try {
+                await navigator.clipboard.writeText(fullUrl);
+                showOk("Copied URL.");
+              } catch (_) {
+                showErr("Could not copy (browser blocked clipboard).");
+              }
+            });
 
-  const btnPrint = document.createElement("button");
-  btnPrint.className = "smallBtn";
-  btnPrint.type = "button";
-  btnPrint.textContent = "Print";
-  btnPrint.addEventListener("click", () => printMagnet(qrPngUrl, label));
+            const btnPrint = document.createElement("button");
+            btnPrint.className = "smallBtn";
+            btnPrint.type = "button";
+            btnPrint.textContent = "Print";
+            btnPrint.addEventListener("click", () => printMagnet(qrPngUrl, label));
 
-  wrap.appendChild(btnOpen);
-  wrap.appendChild(btnCopy);
-  wrap.appendChild(btnPrint);
+            wrap.appendChild(btnOpen);
+            wrap.appendChild(btnCopy);
+            wrap.appendChild(btnPrint);
 
-  tdActions.appendChild(wrap);
+            tdActions.appendChild(wrap);
 
-  tr.appendChild(tdLabel);
-  tr.appendChild(tdCreated);
-  tr.appendChild(tdId);
-  tr.appendChild(tdActions);
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdCreated);
+            tr.appendChild(tdId);
+            tr.appendChild(tdActions);
 
-  $listBody.appendChild(tr);
-}
+            $listBody.appendChild(tr);
+          }
 
           $listWrap.style.display = "block";
         } catch (e) {
